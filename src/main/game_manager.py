@@ -1,5 +1,4 @@
 import sys
-from turtle import Screen
 import pygame
 
 from scene.main_menu import MainMenu

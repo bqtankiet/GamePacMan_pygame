@@ -55,6 +55,9 @@ class MainMenu(Scene):
     # các method cụ thể để xử lý sự kiện của button cụ thể 
     def __handle_start_game_clicked(self):
         print("Start Game Clicked - scene.main_menu.handle_start_game_clicked")
+        # Thực hiện logic khi nhấn nút start game bên dưới
+        # Todo: Thay đổi current_scene của GameManger sang màn hình GamePlay
+        # ...
 
     def __handle_exit_clicked(self):
         print("Exit Clicked - scene.main_menu.handle_exit_clicked")
