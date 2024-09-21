@@ -16,14 +16,12 @@ class MainMenu(Scene):
         self._surface.blit(background, background.get_rect(center = (WIDTH//2, HEIGHT//2)))
 
         # text button "START GAME"
-        button_position = ((WIDTH-80*SCALE)//2, 220)
-        self.button_start_game = ButtonFactory.create_btn_start_game(button_position)
+        self.button_start_game = ButtonFactory.create_btn_start_game()
         self.button_start_game.draw(self._surface)
         self.button_start_game.handle_clicked = self.__handle_start_game_clicked
 
         # text button "EXIT"
-        button_position = (((WIDTH-40*SCALE)//2, 270))
-        self.button_exit = ButtonFactory.create_btn_exit(button_position)
+        self.button_exit = ButtonFactory.create_btn_exit()
         self.button_exit.draw(self._surface)
         self.button_exit.handle_clicked = self.__handle_exit_clicked
 

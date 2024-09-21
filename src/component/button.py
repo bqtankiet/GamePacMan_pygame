@@ -1,11 +1,14 @@
 
+from utils.spriteLoader import SpriteLoader
+
+
 class Button():
-    def __init__(self, default_img, hovered_img, topleft):
-        self.default_img = default_img
-        self.hovered_img = hovered_img
+    def __init__(self, text, default_color, hovered_color, topleft):
+        self.default_img = SpriteLoader().text_image(text, default_color)
+        self.hovered_img = SpriteLoader().text_image(text, hovered_color)
         self.topleft = topleft
 
-        self.image = default_img
+        self.image = self.default_img
         self.width = self.image.get_width()
         self.height = self.image.get_height()
 
