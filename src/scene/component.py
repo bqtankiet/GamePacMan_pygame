@@ -1,8 +1,8 @@
-
+from utils.spriteLoader import SpriteLoader
+from utils.constant import SCALE, WIDTH
 from utils.spriteLoader import SpriteLoader
 
-
-class Button():
+class TextButton():
     def __init__(self, text, default_color, hovered_color, topleft):
         self.default_img = SpriteLoader().text_image(text, default_color)
         self.hovered_img = SpriteLoader().text_image(text, hovered_color)
@@ -41,3 +41,14 @@ class Button():
         self.is_hovered = False
 
     def handle_clicked(): pass
+
+class ButtonFactory:
+    @staticmethod
+    def create_btn_start_game():
+        topleft = ((WIDTH-80*SCALE)//2, 220)
+        return TextButton("Start Game", "white", "red", topleft)
+    
+    @staticmethod
+    def create_btn_exit():
+        topleft = (((WIDTH-40*SCALE)//2, 270))
+        return TextButton("Exit", "white", "red", topleft)
