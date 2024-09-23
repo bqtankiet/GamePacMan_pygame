@@ -1,7 +1,7 @@
 import sys
 import pygame
 
-from scene.game_play import GamePlay
+from scene.gameplay import GamePlay
 from scene.main_menu import MainMenu
 from utils.constant import HEIGHT, WIDTH
 

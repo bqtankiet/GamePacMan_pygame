@@ -1,11 +1,11 @@
-from utils.spriteLoader import SpriteLoader
 from utils.constant import SCALE, WIDTH
-from utils.spriteLoader import SpriteLoader
+from utils.loader import ImageLoader
 
 class TextButton():
     def __init__(self, text, default_color, hovered_color, topleft):
-        self.default_img = SpriteLoader().text_image(text, default_color)
-        self.hovered_img = SpriteLoader().text_image(text, hovered_color)
+        image_loader = ImageLoader()
+        self.default_img = image_loader.text_image(text, default_color)
+        self.hovered_img = image_loader.text_image(text, hovered_color)
         self.topleft = topleft
 
         self.image = self.default_img
@@ -52,3 +52,7 @@ class ButtonFactory:
     def create_btn_exit():
         topleft = (((WIDTH-40*SCALE)//2, 270))
         return TextButton("Exit", "white", "red", topleft)
+
+class ConfirmDialog:
+    def __init__(self) -> None:
+        pass

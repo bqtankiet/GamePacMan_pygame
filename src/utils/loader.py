@@ -1,22 +1,22 @@
 import pygame
 
 from utils.constant import SCALE
-RESOURCE = "resource/sprites/"
+IMAGE_FOLDER = "resource/images/"
 
-class SpriteLoader:
+class ImageLoader:
     """Singleton"""
     _instance = None
 
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
-            cls._instance = super(SpriteLoader, cls).__new__(cls, *args, **kwargs)
+            cls._instance = super(ImageLoader, cls).__new__(cls, *args, **kwargs)
         return cls._instance
 
     def __init__(self) -> None:
         if not hasattr(self, 'initialized'):
-            self.general_sprites = pygame.image.load(RESOURCE + "Arcade - Pac-Man - General Sprites.png")
-            self.scene = pygame.image.load(RESOURCE + "Arcade - Pac-Man - Attract Mode & HUD Assets.png")
-            self.all_text = pygame.image.load(RESOURCE + "Arcade - Pac-Man - Text.png")
+            self.general_sprites = pygame.image.load(IMAGE_FOLDER + "Arcade - Pac-Man - General Sprites.png")
+            self.scene = pygame.image.load(IMAGE_FOLDER + "Arcade - Pac-Man - Attract Mode & HUD Assets.png")
+            self.all_text = pygame.image.load(IMAGE_FOLDER + "Arcade - Pac-Man - Text.png")
             self.initialized = True
     
     def background_main_menu (self):

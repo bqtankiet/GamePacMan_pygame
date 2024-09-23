@@ -2,17 +2,17 @@
 import sys
 import pygame
 from scene.component import ButtonFactory
-from scene.game_play import GamePlay
+from scene.gameplay import GamePlay
 from scene.scene import Scene
 from utils.constant import HEIGHT, WIDTH
-from utils.spriteLoader import SpriteLoader
+from utils.loader import ImageLoader
 
 
 class MainMenu(Scene):
 
     def renderSurface(self):
         """Override Scene.renderSurface"""
-        spriteLoader = SpriteLoader()
+        spriteLoader = ImageLoader()
         # background
         background = spriteLoader.background_main_menu()
         self._surface.blit(background, background.get_rect(center = (WIDTH//2, HEIGHT//2)))
