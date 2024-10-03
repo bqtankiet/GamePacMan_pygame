@@ -1,5 +1,4 @@
-from main.game_manager import GameManager
+from src.core.game import Game
 
 if __name__ == '__main__':
-    game_manager = GameManager()
-    game_manager.run()
+    Game().run()
