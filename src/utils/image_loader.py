@@ -113,6 +113,51 @@ class ImageLoader:
         img = pygame.transform.scale_by(img, SCALE)
         return img
 
+    def pacman_0(self):
+        img = self.general_sprites.subsurface(488, 0, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def pacman_r1(self):
+        img = self.general_sprites.subsurface(472, 0, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def pacman_r2(self):
+        img = self.general_sprites.subsurface(456, 0, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def pacman_l1(self):
+        img = self.general_sprites.subsurface(472, 16, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def pacman_l2(self):
+        img = self.general_sprites.subsurface(456, 16, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def pacman_u1(self):
+        img = self.general_sprites.subsurface(472, 32, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def pacman_u2(self):
+        img = self.general_sprites.subsurface(456, 32, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def pacman_d1(self):
+        img = self.general_sprites.subsurface(472, 48, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def pacman_d2(self):
+        img = self.general_sprites.subsurface(456, 48, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
     # Text
     def text_image(self, text, color = 'white'):
         text = text.upper()
