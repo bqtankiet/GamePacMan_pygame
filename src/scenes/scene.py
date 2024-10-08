@@ -7,8 +7,7 @@ class Scene:
         self.game = game
         self.surface = pygame.Surface((WIDTH, HEIGHT))
         self.surface.fill("BLACK")
-        self.render_surface()
-    
+
     def render(self):
         self.game.screen.blit(self.surface, (0, 0))
 
