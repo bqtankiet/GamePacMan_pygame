@@ -14,14 +14,24 @@ class ImageLoader:
 
     def __init__(self) -> None:
         if not hasattr(self, 'initialized'):
-            self.general_sprites = pygame.image.load(IMAGE_FOLDER + "Arcade - Pac-Man - General Sprites.png").convert_alpha()
-            self.scene = pygame.image.load(IMAGE_FOLDER + "Arcade - Pac-Man - Attract Mode & HUD Assets.png").convert_alpha()
-            self.all_text = pygame.image.load(IMAGE_FOLDER + "Arcade - Pac-Man - Text.png").convert_alpha()
             self.initialized = True
+            # load sprite image
+            self.general_sprites = pygame.image.load(IMAGE_FOLDER + "Arcade - Pac-Man - General Sprites.png")
+            self.scene = pygame.image.load(IMAGE_FOLDER + "Arcade - Pac-Man - Attract Mode & HUD Assets.png")
+            self.all_text = pygame.image.load(IMAGE_FOLDER + "Arcade - Pac-Man - Text.png")
+            # remove background
+            self.general_sprites.set_colorkey((0,0,0))
+            self.all_text.set_colorkey((0,0,0))
+            self.scene.set_colorkey((0,0,0))
 
     # Background
     def background_main_menu(self):
         img = self.scene.subsurface(464, 304, 224, 288)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def background_maze(self):
+        img = self.general_sprites.subsurface(224, 0, 456-224, 248)
         img = pygame.transform.scale_by(img, SCALE)
         return img
 
