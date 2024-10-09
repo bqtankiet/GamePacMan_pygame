@@ -1,15 +1,15 @@
 import src.entities as entities
+from src.utils.enum import Direction
 from src.utils.image_loader import ImageLoader
 
 class Animation:
     def __init__(self, entity):
-        img = ImageLoader()
         self.entity = entity
         self.index = 0
         self.frame_tick = 0
         self.frame_rate = 5
         if isinstance(entity, entities.pacman.Pacman):
-            self.sprites = self.SpritesFactory.pacman()
+            self.sprites = self.SpriteSheets.pacman()
 
     def next(self):
         """ get next sprite from current state """
@@ -28,13 +28,13 @@ class Animation:
             self.entity.image = self.next()
         else: self.entity.image = self.current()
 
-    class SpritesFactory:
+    class SpriteSheets:
         @staticmethod
         def pacman():
             img = ImageLoader()
             return {
-                "left": (img.pacman_0(), img.pacman_l1(), img.pacman_l2(), img.pacman_l1()),
-                "right": (img.pacman_0(), img.pacman_r1(), img.pacman_r2(), img.pacman_r1()),
-                "up": (img.pacman_0(), img.pacman_u1(), img.pacman_u2(), img.pacman_u1()),
-                "down": (img.pacman_0(), img.pacman_d1(), img.pacman_d2(), img.pacman_d1())
+                Direction.LEFT: (img.pacman_0(), img.pacman_l1(), img.pacman_l2(), img.pacman_l1()),
+                Direction.RIGHT: (img.pacman_0(), img.pacman_r1(), img.pacman_r2(), img.pacman_r1()),
+                Direction.UP: (img.pacman_0(), img.pacman_u1(), img.pacman_u2(), img.pacman_u1()),
+                Direction.DOWN: (img.pacman_0(), img.pacman_d1(), img.pacman_d2(), img.pacman_d1())
             }
