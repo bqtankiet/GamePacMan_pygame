@@ -2,6 +2,7 @@ import pygame
 
 from src.entities.pacman import Pacman
 from src.scenes.scene import Scene
+from src.utils.enum import Direction
 
 
 class GamePlay(Scene):
@@ -12,19 +13,19 @@ class GamePlay(Scene):
         self.sprites.add(self.pacman)
 
     def render_surface(self):
-        self.surface.fill("BLACK")
+        self.surface.fill("black")
         self.sprites.draw(self.surface)
 
     def handle_event(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
-            self.pacman.direction = "left"
+            self.pacman.direction = Direction.LEFT
         elif keys[pygame.K_RIGHT]:
-            self.pacman.direction = "right"
+            self.pacman.direction = Direction.RIGHT
         elif keys[pygame.K_UP]:
-            self.pacman.direction = "up"
+            self.pacman.direction = Direction.UP
         elif keys[pygame.K_DOWN]:
-            self.pacman.direction = "down"
+            self.pacman.direction = Direction.DOWN
 
     def update(self):
         self.sprites.update()
