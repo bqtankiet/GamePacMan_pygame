@@ -14,9 +14,19 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 running = False
             # update
-            text = ImageLoader().pacman_live()
-            area = text.get_rect(center = (WIDTH//2, HEIGHT//2))
-            screen.blit(text, area)
+            box1 = pygame.Surface((50, 50))
+            box1.fill("red")
+            box1_rect = box1.get_rect(topleft=(0, 0))
+
+            box2 = pygame.Surface((50, 50))
+            box2.fill("green")
+            box2_rect = box2.get_rect(topleft = (0, 50))
+
+            screen.blit(box1, box1_rect.topleft)
+            screen.blit(box2, box2_rect.topleft)
+            print(box1_rect, box2_rect)
+            print(box1_rect.colliderect(box2_rect))
+
             # end update
             pygame.display.flip()
             clock.tick(60)

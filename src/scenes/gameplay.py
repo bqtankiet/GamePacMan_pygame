@@ -3,6 +3,7 @@ import pygame
 from src.entities.pacman import Pacman
 from src.scenes.scene import Scene
 from src.utils.enum import Direction
+import src.utils.debugger as debugger
 
 
 class GamePlay(Scene):
@@ -15,6 +16,8 @@ class GamePlay(Scene):
     def render_surface(self):
         self.surface.fill("black")
         self.sprites.draw(self.surface)
+        #draw hitbox
+        debugger.draw_hitbox(self.surface, self.pacman)
 
     def handle_event(self):
         keys = pygame.key.get_pressed()
