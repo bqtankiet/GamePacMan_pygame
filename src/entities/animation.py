@@ -3,6 +3,7 @@ from src.utils.enum import Direction
 from src.utils.image_loader import ImageLoader
 
 class Animation:
+    """A class to manage animations for game entities such as Pacman and Ghost"""
     def __init__(self, entity):
         self.entity = entity
         self.index = 0
@@ -29,6 +30,7 @@ class Animation:
         else: self.entity.image = self.current()
 
     class SpriteSheets:
+        """Animation inner class use to get image for animation"""
         @staticmethod
         def pacman():
             img = ImageLoader()
