@@ -31,7 +31,7 @@ class ImageLoader:
         return img
 
     def background_maze(self):
-        img = self.general_sprites.subsurface(224, 0, 456-224, 248)
+        img = self.general_sprites.subsurface(0, 0, 224, 248)
         img = pygame.transform.scale_by(img, SCALE)
         return img
 
