@@ -4,7 +4,7 @@ from .constant import SCALE
 IMAGE_FOLDER = "../resource/images/"
 
 class ImageLoader:
-    """Singleton"""
+    """Singleton. Quản lý các hình ảnh của game. Cung cấp các phương thức để lấy hình ảnh"""
     _instance = None
 
     def __new__(cls, *args, **kwargs):
@@ -14,14 +14,24 @@ class ImageLoader:
 
     def __init__(self) -> None:
         if not hasattr(self, 'initialized'):
-            self.general_sprites = pygame.image.load(IMAGE_FOLDER + "Arcade - Pac-Man - General Sprites.png").convert_alpha()
-            self.scene = pygame.image.load(IMAGE_FOLDER + "Arcade - Pac-Man - Attract Mode & HUD Assets.png").convert_alpha()
-            self.all_text = pygame.image.load(IMAGE_FOLDER + "Arcade - Pac-Man - Text.png").convert_alpha()
             self.initialized = True
+            # load sprite image
+            self.general_sprites = pygame.image.load(IMAGE_FOLDER + "Arcade - Pac-Man - General Sprites.png")
+            self.scene = pygame.image.load(IMAGE_FOLDER + "Arcade - Pac-Man - Attract Mode & HUD Assets.png")
+            self.all_text = pygame.image.load(IMAGE_FOLDER + "Arcade - Pac-Man - Text.png")
+            # remove background
+            self.general_sprites.set_colorkey((0,0,0))
+            self.all_text.set_colorkey((0,0,0))
+            self.scene.set_colorkey((0,0,0))
 
     # Background
     def background_main_menu(self):
         img = self.scene.subsurface(464, 304, 224, 288)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def background_maze(self):
+        img = self.general_sprites.subsurface(0, 0, 224, 248)
         img = pygame.transform.scale_by(img, SCALE)
         return img
 
@@ -110,6 +120,51 @@ class ImageLoader:
     # Pacman
     def pacman_live(self):
         img = self.general_sprites.subsurface(584, 16, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def pacman_0(self):
+        img = self.general_sprites.subsurface(488, 0, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def pacman_r1(self):
+        img = self.general_sprites.subsurface(472, 0, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def pacman_r2(self):
+        img = self.general_sprites.subsurface(456, 0, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def pacman_l1(self):
+        img = self.general_sprites.subsurface(472, 16, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def pacman_l2(self):
+        img = self.general_sprites.subsurface(456, 16, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def pacman_u1(self):
+        img = self.general_sprites.subsurface(472, 32, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def pacman_u2(self):
+        img = self.general_sprites.subsurface(456, 32, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def pacman_d1(self):
+        img = self.general_sprites.subsurface(472, 48, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def pacman_d2(self):
+        img = self.general_sprites.subsurface(456, 48, 16, 16)
         img = pygame.transform.scale_by(img, SCALE)
         return img
 

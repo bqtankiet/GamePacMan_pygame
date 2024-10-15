@@ -4,7 +4,7 @@ import pygame
 
 from src.scenes.gameplay import GamePlay
 from src.scenes.main_menu import MainMenu
-from src.utils.constant import HEIGHT, WIDTH
+import src.utils.constant as const
 
 
 class Game:
@@ -16,15 +16,17 @@ class Game:
 
             # init attributes
             self.clock = pygame.time.Clock()
-            self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+            self.screen = pygame.display.set_mode((const.WIDTH, const.HEIGHT), pygame.FULLSCREEN)
             self.scenes = {
                  "MainMenu": MainMenu(self),
                  "GamePlay": GamePlay(self)
+                # other screens go here
             }
             self.current_scene = self.scenes["MainMenu"]
             self.running = True
 
     def run(self):
+        """Game loop chính"""
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: running = False
@@ -34,7 +36,7 @@ class Game:
             self.current_scene.render()
 
             pygame.display.flip()
-            self.clock.tick(60)
+            self.clock.tick(const.FPS)
         pygame.quit()
         sys.exit()
 
