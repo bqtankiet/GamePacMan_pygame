@@ -13,7 +13,7 @@ class Pacman(pygame.sprite.Sprite):
         self.animation = Animation(self)
         self.image = self.animation.current()
         self.rect = self.image.get_rect()
-        self.hitbox = pygame.Rect(0, 0, BLOCK_SIZE*SCALE-2, BLOCK_SIZE*SCALE-2)
+        self.hitbox = pygame.Rect(0, 0, BLOCK_SIZE*SCALE, BLOCK_SIZE*SCALE)
         self.speed = 2
 
     def update(self):

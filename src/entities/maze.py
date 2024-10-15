@@ -63,7 +63,11 @@ class Maze:
         """Kiểm tra va chạm giữa thực thể và tường trong mê cung
         Return True nếu va chạm xảy ra, ngược lại return False"""
         hitbox = entity.get_hitbox()
-        for corner in (hitbox.topleft, hitbox.topright, hitbox.bottomleft, hitbox.bottomright):
+        topleft = hitbox.topleft
+        topright = (hitbox.topright[0]-1, hitbox.topright[1])
+        bottomleft = (hitbox.bottomleft[0], hitbox.bottomleft[1]-1)
+        bottomright = (hitbox.bottomright[0]-1, hitbox.bottomright[1]-1)
+        for corner in (topleft, topright, bottomleft, bottomright):
             r, c = self.pixel_to_grid(corner)
             if self.grid[r][c] == Maze.WALL:
                 return True
