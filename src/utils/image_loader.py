@@ -4,7 +4,7 @@ from .constant import SCALE
 IMAGE_FOLDER = "../resource/images/"
 
 class ImageLoader:
-    """Singleton"""
+    """Singleton. Quản lý các hình ảnh của game. Cung cấp các phương thức để lấy hình ảnh"""
     _instance = None
 
     def __new__(cls, *args, **kwargs):

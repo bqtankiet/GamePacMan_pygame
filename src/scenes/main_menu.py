@@ -10,6 +10,7 @@ from src.utils.image_loader import ImageLoader
 
 
 class MainMenu(Scene):
+    """Màn hình Main Menu của game """
 
     def __init__(self, game):
         super().__init__(game)
@@ -19,7 +20,6 @@ class MainMenu(Scene):
         self.render_surface()
 
     def render_surface(self):
-        """Override Scene.render_surface"""
         image_loader = ImageLoader()
         # background
         background = image_loader.background_main_menu()
@@ -39,7 +39,6 @@ class MainMenu(Scene):
         self.selected_button = self.button_start_game
 
     def handle_event(self):
-        """Override Scene.handle_event"""
         keys = pygame.key.get_pressed()
         if keys[pygame.K_RETURN]:
             self.selected_button.handle_clicked()
@@ -51,7 +50,6 @@ class MainMenu(Scene):
             self.selected_button = self.button_exit
 
     def update(self):
-        """Override Scene.update"""
         self.selected_button.update()
         self.selected_button.render(self.surface)
 
