@@ -3,11 +3,10 @@ import sys
 import pygame
 
 import src.utils.constant as const
-from src.scenes.gameplay import GamePlay
-from src.scenes.main_menu import MainMenu
+from src.scenes.pause_game import PauseGame
 
 
-class Game:
+class TestPauseGame:
     def __init__(self):
         # init pygame
         pygame.init()
@@ -17,16 +16,10 @@ class Game:
         # init attributes
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((const.WIDTH, const.HEIGHT), pygame.FULLSCREEN)
-        self.scenes = {
-            "MainMenu": MainMenu(self),
-            "GamePlay": GamePlay(self)
-            # other screens go here
-        }
-        self.current_scene = self.scenes["MainMenu"]
+        self.current_scene = PauseGame(self)
         self.running = True
 
     def run(self):
-        """Game loop chính"""
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: running = False
@@ -43,5 +36,5 @@ class Game:
     def exit(self):
         self.running = False
 
-    def switch_scene(self, scene_name):
-        self.current_scene = self.scenes[scene_name]
+if __name__ == '__main__':
+    TestPauseGame().run()

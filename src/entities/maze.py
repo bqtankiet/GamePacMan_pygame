@@ -1,7 +1,6 @@
 import pygame
 
-import src.utils.debugger as debugger
-from src.utils.constant import BLOCK_SIZE, SCALE
+from src.utils.constant import BLOCK_SIZE, SCALE, WIDTH, HEIGHT
 from src.utils.enum import Direction
 from src.utils.image_loader import ImageLoader
 
@@ -10,95 +9,33 @@ class Maze:
     WALL = 1
 
     def __init__(self):
-        self.image = ImageLoader().background_maze()
-        self.grid = self.get_grid()
-        self.surface = pygame.Surface((self.image.get_width(), self.image.get_height()))
-        self.pacman = None
-        self.block_size_scaled = BLOCK_SIZE * SCALE
-        # debugger.draw_grid(self.image)
-
-    def render(self):
-        """Vẽ hình ảnh của các entity và mê cung lên surface"""
-        self.surface.fill("black")
-        self.surface.blit(self.image, (0, 0))
-        self.draw_entity(self.pacman)
-        # debugger.draw_hitbox(self.surface, self.pacman)
-
-    def draw_entity(self, pacman):
-        """Vẽ entity lên surface
-        Nhận vào một entity và vẽ nó lên surface của mê cung"""
-        self.surface.blit(self.pacman.image, self.pacman.rect)
+        self.__grid = self.get_grid()
+        self.__entities = []
+        self.__collision_manager = CollisionManager(self.__grid)
 
     def update(self):
-        """Cập nhật trạng thái của mê cung sau mỗi frame"""
-        #update Pacman
-        self.update_pacman()
-        #update Ghosts
-        #update Maze
-        #render surface
-        self.render()
+        for entity in self.__entities:
+            self.update_entity(entity)
 
-    def update_pacman(self):
-        """Xử lý các logic cập nhật cho Pacman
-        (Xử lý hiện tại: Cập nhật hướng di chuyển của pacman nếu có thể. Cập nhật vị trí của Pacman, nếu va chạm tường thì quay lại vị trí trước đó)"""
-        old_position = self.pacman.rect.topleft
-
-        if self.can_move(self.pacman, self.pacman.next_direction):
-            self.pacman.direction = self.pacman.next_direction
-
+    def update_entity(self, entity):
+        # update position
+        old_position = entity.rect.topleft
+        if self.__collision_manager.can_move(entity, entity.get_next_direction()):
+            entity.change_direction()
         # TODO: Chưa xử lý khi Pacman đi ra khỏi rìa map
-        self.pacman.update()
-
-        if self.collide_wall(self.pacman):
-            self.pacman.rect.topleft = old_position
+        entity.update()
+        if self.__collision_manager.is_collide_wall(entity):
+            entity.rect.topleft = old_position
 
     def add_pacman(self, pacman, position):
         """Thêm Pacman vào Mê cung"""
-        self.pacman = pacman
-        x, y = self.grid_to_pixel(position)
-        pacman.hitbox.center = (x, y)
+        self.__entities.append(pacman)
+        x, y = self.__collision_manager.grid_to_pixel(position)
+        pacman.get_hitbox().center = (x, y)
         pacman.rect.center = (x, y)
 
-    def collide_wall(self, entity):
-        """Kiểm tra va chạm giữa thực thể và tường trong mê cung
-        Return True nếu va chạm xảy ra, ngược lại return False"""
-        hitbox = entity.get_hitbox()
-        for corner in (hitbox.topleft, hitbox.topright, hitbox.bottomleft, hitbox.bottomright):
-            r, c = self.pixel_to_grid(corner)
-            if self.grid[r][c] == Maze.WALL:
-                return True
-        return False
-
-    def can_move(self, entity, direction):
-        """Kiểm tra xem thực thể có thê di chuyển theo hướng cho trước hay không"""
-        result = True
-        old_xy = (entity.rect.x, entity.rect.y)
-        if direction == Direction.LEFT: entity.rect.x -= entity.speed
-        elif direction == Direction.RIGHT: entity.rect.x += entity.speed
-        elif direction == Direction.UP: entity.rect.y -= entity.speed
-        elif direction == Direction.DOWN: entity.rect.y += entity.speed
-
-        if self.collide_wall(entity): result = False
-
-        entity.rect.x = old_xy[0]
-        entity.rect.y = old_xy[1]
-        return result
-
-    def grid_to_pixel(self, position):
-        """Chuyển đổi vị trí ô trong lưới sang vị trí pixel"""
-        x = (position[1] * self.block_size_scaled) + (self.block_size_scaled / 2)
-        y = (position[0] * self.block_size_scaled) + (self.block_size_scaled / 2)
-        return x, y
-
-    def pixel_to_grid(self, position):
-        """Chuyển đổi một vị trí pixel thành vị trí ô trong lưới"""
-        x, y = position
-        r = int(y / self.block_size_scaled)
-        c = int(x / self.block_size_scaled)
-        return r, c
-
-    def get_image(self):
-        return self.image
+    def get_entities(self):
+        return self.__entities
 
     def get_grid(self):
         return [
@@ -134,3 +71,75 @@ class Maze:
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         ]
+
+class CollisionManager:
+    """Class phụ trách việc kiểm tra và xử lý chạm"""
+    def __init__(self, grid):
+        self.__grid = grid
+        self.__block_size_scaled = BLOCK_SIZE * SCALE
+
+    def can_move(self, entity, direction):
+        """Kiểm tra xem thực thể có thê di chuyển theo hướng cho trước hay không"""
+        result = True
+        old_xy = (entity.rect.x, entity.rect.y)
+        if direction == Direction.LEFT:
+            entity.rect.x -= entity.get_speed()
+        elif direction == Direction.RIGHT:
+            entity.rect.x += entity.get_speed()
+        elif direction == Direction.UP:
+            entity.rect.y -= entity.get_speed()
+        elif direction == Direction.DOWN:
+            entity.rect.y += entity.get_speed()
+
+        if self.is_collide_wall(entity): result = False
+
+        entity.rect.x = old_xy[0]
+        entity.rect.y = old_xy[1]
+        return result
+
+    def is_collide_wall(self, entity):
+        """Kiểm tra va chạm giữa thực thể và tường"""
+        hitbox = entity.get_hitbox()
+        corners = [
+            hitbox.topleft,
+            (hitbox.topright[0] - 1, hitbox.topright[1]),
+            (hitbox.bottomleft[0], hitbox.bottomleft[1] - 1),
+            (hitbox.bottomright[0] - 1, hitbox.bottomright[1] - 1)
+        ]
+        for corner in corners:
+            r, c = self.pixel_to_grid(corner)
+            if self.__grid[r][c] == Maze.WALL:
+                return True
+        return False
+
+    def pixel_to_grid(self, position):
+        """Chuyển đổi pixel thành vị trí trong lưới"""
+        x, y = position
+        r = int(y / self.__block_size_scaled)
+        c = int(x / self.__block_size_scaled)
+        return r, c
+
+    def grid_to_pixel(self, position):
+        """Chuyển đổi vị trí ô trong lưới sang vị trí pixel"""
+        x = (position[1] * self.__block_size_scaled) + (self.__block_size_scaled / 2)
+        y = (position[0] * self.__block_size_scaled) + (self.__block_size_scaled / 2)
+        return x, y
+
+class MazeRender:
+    def __init__(self, maze):
+        self.__maze_image = self.__image = ImageLoader().background_maze()
+        self.__maze_surface = pygame.Surface((self.__maze_image.get_size()))
+        self.__entities = pygame.sprite.Group(maze.get_entities())
+        self.__area = self.__image.get_rect(center=(WIDTH / 2, HEIGHT / 2))
+
+    def render(self):
+        self.draw_maze()
+        self.draw_entities()
+        return self.__maze_surface
+
+    def draw_entities(self):
+        self.__entities.draw(self.__maze_surface)
+
+    def draw_maze(self):
+        self.__maze_surface.fill("black")
+        self.__maze_surface.blit(self.__maze_image, (0, 0))
