@@ -14,18 +14,8 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 running = False
             # update
-            box1 = pygame.Surface((50, 50))
-            box1.fill("red")
-            box1_rect = box1.get_rect(topleft=(0, 0))
-
-            box2 = pygame.Surface((50, 50))
-            box2.fill("green")
-            box2_rect = box2.get_rect(topleft = (0, 50))
-
-            screen.blit(box1, box1_rect.topleft)
-            screen.blit(box2, box2_rect.topleft)
-            print(box1_rect, box2_rect)
-            print(box1_rect.colliderect(box2_rect))
+            image = ImageLoader().text_image("Hello World")
+            screen.blit(image, (100, 100))
 
             # end update
             pygame.display.flip()

@@ -1,11 +1,10 @@
 import pygame
 
-from src.entities.maze import Maze
+from src.entities.maze import Maze, MazeRender
 from src.entities.pacman import Pacman
 from src.scenes.scene import Scene
 from src.utils.constant import WIDTH, HEIGHT
 from src.utils.enum import Direction
-import src.utils.debugger as debugger
 
 
 class GamePlay(Scene):
@@ -13,28 +12,38 @@ class GamePlay(Scene):
 
     def __init__(self, game):
         super().__init__(game)
-        self.pacman = Pacman()
-        self.maze = Maze()
-        self.maze.add_pacman(self.pacman, (23 , 14))
+        self.__pacman = Pacman()
+        self.__maze = Maze()
+        self.__maze.add_pacman(self.__pacman, (23, 14))
+        self.__maze_render = MazeRender(self.__maze)
 
+    #-----------------------------------------
+    # Các methods override của lớp cha (Scene)
+    #-----------------------------------------
     def render_surface(self):
-        self.surface.fill("black")
-        self.maze.render()
-        self.surface.blit(self.maze.surface, self.maze.surface.get_rect(center = (WIDTH//2, HEIGHT//2)))
+        maze_surface = self.__maze_render.render()
+        maze_rect = maze_surface.get_rect(center = (WIDTH / 2, HEIGHT / 2))
+        self._surface.blit(maze_surface, maze_rect)
 
-    def handle_event(self):
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            self.pacman.next_direction = Direction.LEFT
-        elif keys[pygame.K_RIGHT]:
-            self.pacman.next_direction = Direction.RIGHT
-        elif keys[pygame.K_UP]:
-            self.pacman.next_direction = Direction.UP
-        elif keys[pygame.K_DOWN]:
-            self.pacman.next_direction = Direction.DOWN
+    def handle_event(self, event):
+        if event.type != pygame.KEYDOWN: return
+
+        if event.key == pygame.K_LEFT:
+            self.__pacman.set_next_direction(Direction.LEFT)
+        elif event.key == pygame.K_RIGHT:
+            self.__pacman.set_next_direction(Direction.RIGHT)
+        elif event.key == pygame.K_UP:
+            self.__pacman.set_next_direction(Direction.UP)
+        elif event.key == pygame.K_DOWN:
+            self.__pacman.set_next_direction(Direction.DOWN)
 
     def update(self):
-        self.maze.update()
+        self.__maze.update()
         self.render_surface()
 
-    def reset(self): pass
+    def reset(self):
+        pass
+
+    #----------------------------------------
+    # Các methods riêng của lớp GamePlay
+    #----------------------------------------

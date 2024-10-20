@@ -1,9 +1,6 @@
-
-import sys
-
 import pygame
 
-from src.scenes.component import ButtonFactory
+from src.scenes.component import TextButton, ButtonGroup
 from src.scenes.scene import Scene
 from src.utils.constant import HEIGHT, WIDTH
 from src.utils.image_loader import ImageLoader
@@ -14,58 +11,65 @@ class MainMenu(Scene):
 
     def __init__(self, game):
         super().__init__(game)
-        self.button_start_game = None
-        self.button_exit = None
-        self.selected_button = None
+        self.__background = ImageLoader().background_main_menu()
+        self.__button_start = TextButton("Start Game", action=lambda: self._game.switch_scene("GamePlay"))
+        self.__button_exit = TextButton("Exit", action=lambda: self._game.exit())
+        self.__button_group = ButtonGroup([self.__button_start, self.__button_exit])
+
+        self.__selected_button = self.__button_group.current()
+        self.__selected_button.focus()
+
         self.render_surface()
 
+    #-----------------------------------------
+    # Các methods override của lớp cha (Scene)
+    #-----------------------------------------
     def render_surface(self):
-        image_loader = ImageLoader()
-        # background
-        background = image_loader.background_main_menu()
-        self.surface.blit(background, background.get_rect(center = (WIDTH // 2, HEIGHT // 2)))
+        # render background
+        self._surface.blit(self.__background, self.__background.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
 
-        # text button "START GAME"
-        self.button_start_game = ButtonFactory.create_btn_start_game()
-        self.button_start_game.render(self.surface)
-        self.button_start_game.handle_clicked = self.__handle_start_game_clicked
+        # render button "START GAME"
+        position = (WIDTH // 2, 220)
+        self.__button_start.set_position(center=position)
+        self.__button_start.render(self._surface)
 
-        # text button "EXIT"
-        self.button_exit = ButtonFactory.create_btn_exit()
-        self.button_exit.render(self.surface)
-        self.button_exit.handle_clicked = self.__handle_exit_clicked
+        # render button "EXIT"
+        position = (WIDTH // 2, 270)
+        self.__button_exit.set_position(center=position)
+        self.__button_exit.render(self._surface)
 
-        # selected button
-        self.selected_button = self.button_start_game
-
-    def handle_event(self):
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_RETURN]:
-            self.selected_button.handle_clicked()
-        elif keys[pygame.K_UP]:
-            self.__reset_button(self.button_exit)
-            self.selected_button = self.button_start_game
-        elif keys[pygame.K_DOWN]:
-            self.__reset_button(self.button_start_game)
-            self.selected_button = self.button_exit
+    def handle_event(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RETURN:
+                self.enter()
+            elif event.key == pygame.K_DOWN:
+                self.navigate(1)
+            elif event.key == pygame.K_UP:
+                self.navigate(-1)
 
     def update(self):
-        self.selected_button.update()
-        self.selected_button.render(self.surface)
+        self.__selected_button.update()
+        self.render_surface()
 
-    def reset(self): pass
+    def reset(self):
+        pass
 
-    # các method cụ thể để xử lý sự kiện của button cụ thể 
-    def __handle_start_game_clicked(self):
-        print("Start Game Clicked - scenes.main_menu.handle_start_game_clicked")
-        # Todo: Thay đổi current_scene của GameManger sang màn hình GamePlay
-        self.game.switch_scene("GamePlay")
+    #----------------------------------------
+    # Các methods riêng của lớp MainMenu
+    #----------------------------------------
+    def navigate(self, direction):
+        # Xóa focus cũ
+        self.__selected_button.blur()
 
-    def __handle_exit_clicked(self):
-        print("Exit Clicked - scenes.main_menu.handle_exit_clicked")
-        self.game.running = False
+        # chọn button mới
+        if direction > 0:
+            self.__button_group.next()
+        elif direction < 0:
+            self.__button_group.previous()
+        self.__selected_button = self.__button_group.current()
 
-    def __reset_button(self, button):
-        button.reset()
-        button.render(self.surface)
+        # Focus vào button đang chọn
+        self.__selected_button.focus()
 
+    def enter(self):
+        self.__selected_button.fire()

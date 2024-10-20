@@ -1,12 +1,13 @@
 import pygame
 
+from src.entities.maze import Maze
 from src.utils.constant import WIDTH, HEIGHT, BLOCK_SIZE, SCALE
 from src.utils.debugger import draw_grid
-from src.entities.maze import Maze
 
 
 class MazeEditor:
     def __init__(self): pass
+
 
 if __name__ == '__main__':
     pygame.init()
@@ -15,8 +16,8 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     running = True
     maze = Maze()
-    cols = int(maze.image.get_width()/(BLOCK_SIZE*SCALE))
-    rows = int(maze.image.get_height()/(BLOCK_SIZE*SCALE))
+    cols = int(maze.image.get_width() / (BLOCK_SIZE * SCALE))
+    rows = int(maze.image.get_height() / (BLOCK_SIZE * SCALE))
     grid = [[0 for i in range(cols)] for j in range(rows)]
     while running:
         for event in pygame.event.get():
@@ -28,7 +29,9 @@ if __name__ == '__main__':
                 c = int(pos[0] / (BLOCK_SIZE * SCALE))
                 if pygame.mouse.get_pressed()[0]:
                     grid[r][c] = 1
-                    pygame.draw.rect(screen, "red", pygame.Rect(c*BLOCK_SIZE*SCALE, r*BLOCK_SIZE*SCALE, BLOCK_SIZE*SCALE, BLOCK_SIZE*SCALE))
+                    pygame.draw.rect(screen, "red",
+                                     pygame.Rect(c * BLOCK_SIZE * SCALE, r * BLOCK_SIZE * SCALE, BLOCK_SIZE * SCALE,
+                                                 BLOCK_SIZE * SCALE))
                 if pygame.mouse.get_pressed()[2]:
                     grid[r][c] = 0
 

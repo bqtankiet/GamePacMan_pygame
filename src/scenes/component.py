@@ -1,54 +1,71 @@
-import pygame
-
-from src.utils.constant import HEIGHT, SCALE, WIDTH
 from src.utils.image_loader import ImageLoader
 
 
 class TextButton:
-    def __init__(self, text, default_color, hovered_color, top_left=(0, 0)):
-        image_loader = ImageLoader()
-        self.rect = None
-        self.default_img = image_loader.text_image(text, default_color)
-        self.hovered_img = image_loader.text_image(text, hovered_color)
-        self.top_left = top_left
+    def __init__(self, text, *, action=None):
+        self.__default_img = ImageLoader().text_image(text, "white")
+        self.__hovered_img = ImageLoader().text_image(text, "red")
+        self.__image = self.__default_img
+        self.__rect = self.__image.get_rect()
 
-        self.image = self.default_img
-        self.width = self.image.get_width()
-        self.height = self.image.get_height()
+        self.action = action
 
         self.frame_count = 0
         self.frame_rate = 10
-        self.is_hovered = False
+        self.is_focused = False
+
+    def set_position(self, **kwargs):
+        if "top_left" in kwargs:
+            self.__rect.topleft = kwargs['top_left']
+        elif "center" in kwargs:
+            self.__rect.center = kwargs['center']
+
+    def get_width(self):
+        return self.__image.get_width()
+
+    def get_height(self):
+        return self.__image.get_height()
 
     def render(self, surface):
-        self.rect = self.image.get_rect(topleft=self.top_left)
-        surface.blit(self.image, self.rect)
+        surface.blit(self.__image, self.__rect)
 
     def update(self):
+        """Phương thức này để tạo hiệu ứng nhấp nháy khi nó đang được focus"""
+        if not self.is_focused: return
         self.frame_count += 1
-        if self.frame_count >= self.frame_rate:
-            if self.is_hovered:
-                self.image = self.hovered_img
-                self.is_hovered = False
-            else:
-                self.image = self.default_img
-                self.is_hovered = True
+        if self.frame_count < self.frame_rate:
+            self.__image = self.__hovered_img
+        elif self.frame_count < self.frame_rate*2:
+            self.__image = self.__default_img
+        else:
             self.frame_count = 0
 
-    def reset(self):
-        self.image = self.default_img
-        self.is_hovered = False
 
-    def handle_clicked(self): pass
+    def focus(self):
+        self.is_focused = True
+        self.__image = self.__hovered_img
 
+    def blur(self):
+        self.is_focused = False
+        self.__image = self.__default_img
 
-class ButtonFactory:
-    @staticmethod
-    def create_btn_start_game():
-        top_left = ((WIDTH - 80 * SCALE) // 2, 220)
-        return TextButton("Start Game", "white", "red", top_left)
+    def fire(self):
+        if self.action: self.action()
 
-    @staticmethod
-    def create_btn_exit():
-        top_left = ((WIDTH - 40 * SCALE) // 2, 270)
-        return TextButton("Exit", "white", "red", top_left)
+class ButtonGroup:
+    def __init__(self, buttons):
+        self.__buttons = buttons
+        self.__index = 0
+
+    def current(self):
+        return self.__buttons[self.__index]
+
+    def next(self):
+        self.__index += 1
+        if self.__index >= len(self.__buttons): self.__index = 0
+        return self.__buttons[self.__index]
+
+    def previous(self):
+        self.__index -= 1
+        if self.__index < 0: self.__index = -1
+        return self.__buttons[self.__index]
