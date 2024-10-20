@@ -2,8 +2,10 @@ import src.entities as entities
 from src.utils.enum import Direction
 from src.utils.image_loader import ImageLoader
 
+
 class Animation:
     """Class giúp quản lý animation cho Pacman và Ghost"""
+
     def __init__(self, entity):
         self.entity = entity
         self.index = 0
@@ -14,12 +16,12 @@ class Animation:
 
     def next(self):
         """ Lấy ra hình ảnh cho frame tiếp theo """
-        self.index = (self.index + 1) % len(self.sprites[self.entity.direction])
+        self.index = (self.index + 1) % len(self.sprites[self.entity.get_direction()])
         return self.current()
 
     def current(self):
         """ Lấy ra hình ảnh của frame hiện tại """
-        return self.sprites[self.entity.direction][self.index]
+        return self.sprites[self.entity.get_direction()][self.index]
 
     def update(self):
         """ Cập nhật hình ảnh của thực thể """
@@ -27,10 +29,12 @@ class Animation:
         if self.frame_tick >= self.frame_rate:
             self.frame_tick = 0
             self.entity.image = self.next()
-        else: self.entity.image = self.current()
+        else:
+            self.entity.image = self.current()
 
     class SpriteSheets:
         """Inner Class để lấy các sprite sheets của Pacman hoặc Ghost"""
+
         @staticmethod
         def pacman():
             img = ImageLoader()

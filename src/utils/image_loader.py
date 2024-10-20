@@ -1,7 +1,9 @@
 import pygame
 
 from .constant import SCALE
+
 IMAGE_FOLDER = "../resource/images/"
+
 
 class ImageLoader:
     """Singleton. Quản lý các hình ảnh của game. Cung cấp các phương thức để lấy hình ảnh"""
@@ -20,9 +22,9 @@ class ImageLoader:
             self.scene = pygame.image.load(IMAGE_FOLDER + "Arcade - Pac-Man - Attract Mode & HUD Assets.png")
             self.all_text = pygame.image.load(IMAGE_FOLDER + "Arcade - Pac-Man - Text.png")
             # remove background
-            self.general_sprites.set_colorkey((0,0,0))
-            self.all_text.set_colorkey((0,0,0))
-            self.scene.set_colorkey((0,0,0))
+            self.general_sprites.set_colorkey((0, 0, 0))
+            self.all_text.set_colorkey((0, 0, 0))
+            self.scene.set_colorkey((0, 0, 0))
 
     # Background
     def background_main_menu(self):
@@ -169,26 +171,34 @@ class ImageLoader:
         return img
 
     # Text
-    def text_image(self, text, color = 'white'):
+    def text_image(self, text, color='white'):
         text = text.upper()
-        text_surface = pygame.Surface((len(text)*8, 8))
+        text_surface = pygame.Surface((len(text) * 8, 8))
         for index, char in enumerate(text):
-            if   char in "ABCDEFGHIJKLMNO": pos = {'line': 0, 'index': ord(char) - ord('A')}
-            elif char in "PQRSTUVWXYZ":     pos = {'line': 1, 'index': ord(char) - ord('P')}
-            elif char in "0123456789":      pos = {'line': 2, 'index': ord(char) - ord('0')}
-            else: continue #Nếu không phải 'chữ' hoặc 'số' thì duyệt qua kí tự tiếp theo
-            
-            match(color.lower()):
-                case "red":     pos["line"] += 4
-                case "pink":    pos["line"] += 4*2
-                case "cyan":    pos["line"] += 4*3
-                case "orange":  pos["line"] += 4*4
-                case "yellow":  pos["line"] += 4*6
-                
-            left_top = (pos["index"]*8, pos["line"]*8)
+            if char in "ABCDEFGHIJKLMNO":
+                pos = {'line': 0, 'index': ord(char) - ord('A')}
+            elif char in "PQRSTUVWXYZ":
+                pos = {'line': 1, 'index': ord(char) - ord('P')}
+            elif char in "0123456789":
+                pos = {'line': 2, 'index': ord(char) - ord('0')}
+            else:
+                continue  # Nếu không phải 'chữ' hoặc 'số' thì duyệt qua kí tự tiếp theo
+
+            match (color.lower()):
+                case "red":
+                    pos["line"] += 4
+                case "pink":
+                    pos["line"] += 4 * 2
+                case "cyan":
+                    pos["line"] += 4 * 3
+                case "orange":
+                    pos["line"] += 4 * 4
+                case "yellow":
+                    pos["line"] += 4 * 6
+
+            left_top = (pos["index"] * 8, pos["line"] * 8)
             char_img = self.all_text.subsurface(left_top, (8, 8))
-            text_surface.blit(char_img, (index*8, 0))
+            text_surface.blit(char_img, (index * 8, 0))
 
         text_surface = pygame.transform.scale_by(text_surface, SCALE)
         return text_surface
-    

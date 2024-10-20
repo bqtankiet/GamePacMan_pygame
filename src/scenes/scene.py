@@ -1,19 +1,21 @@
+from abc import ABC, abstractmethod
+
 import pygame
 
-from abc import ABC, abstractmethod
 from src.utils.constant import HEIGHT, WIDTH
+
 
 class Scene(ABC):
     """Abstract class dùng để tạo ra các màn hình của Game"""
 
     def __init__(self, game):
-        self.game = game
-        self.surface = pygame.Surface((WIDTH, HEIGHT))
-        self.surface.fill("BLACK")
+        self._game = game
+        self._surface = pygame.Surface((WIDTH, HEIGHT))
+        self._surface.fill("BLACK")
 
     def render(self):
         """Phương thức dùng để hiện thị màn hình hiện tại lên mành hình chính"""
-        self.game.screen.blit(self.surface, (0, 0))
+        self._game.screen.blit(self._surface, (0, 0))
 
     @abstractmethod
     def render_surface(self):
@@ -21,7 +23,7 @@ class Scene(ABC):
         pass
 
     @abstractmethod
-    def handle_event(self):
+    def handle_event(self, event):
         """Các class con cần override phương thức này để xử lý các sự kiện"""
         pass
 
