@@ -2,7 +2,7 @@ import pygame
 
 from src.scenes.component import TextButton, ButtonGroup
 from src.scenes.scene import Scene
-from src.utils.constant import HEIGHT, WIDTH
+from src.utils.constant import HEIGHT, WIDTH, SCALE
 from src.utils.image_loader import ImageLoader
 
 
@@ -26,15 +26,16 @@ class MainMenu(Scene):
     #-----------------------------------------
     def render_surface(self):
         # render background
-        self._surface.blit(self.__background, self.__background.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
+        background_rect = self.__background.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+        self._surface.blit(self.__background, background_rect)
 
         # render button "START GAME"
-        position = (WIDTH // 2, 220)
+        position = (WIDTH // 2, background_rect.y + 60*SCALE)
         self.__button_start.set_position(center=position)
         self.__button_start.render(self._surface)
 
         # render button "EXIT"
-        position = (WIDTH // 2, 270)
+        position = (WIDTH // 2, background_rect.y + 80*SCALE)
         self.__button_exit.set_position(center=position)
         self.__button_exit.render(self._surface)
 
