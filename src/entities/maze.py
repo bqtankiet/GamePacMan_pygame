@@ -18,11 +18,18 @@ class Maze:
             self.update_entity(entity)
 
     def update_entity(self, entity):
-        # update position
+        # cập nhật hướng di chuyển của pacman/ghost
         old_position = entity.rect.topleft
         if self.__collision_manager.can_move(entity, entity.get_next_direction()):
             entity.change_direction()
-        # TODO: Chưa xử lý khi Pacman đi ra khỏi rìa map
+            
+        # Xử lý khi pacman/ghost đi ra khỏi rìa map -> dịch chuyển
+        if entity.rect.left < 0:
+            entity.rect.right = len(self.__grid[0]) * BLOCK_SIZE * SCALE
+        elif entity.rect.right > len(self.__grid[0]) * BLOCK_SIZE * SCALE:
+            entity.rect.left = 0
+        
+        # Cập nhật vị trí của pacman/ghost
         entity.update()
         if self.__collision_manager.is_collide_wall(entity):
             entity.rect.topleft = old_position

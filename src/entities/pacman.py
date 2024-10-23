@@ -18,6 +18,7 @@ class Pacman(pygame.sprite.Sprite):
         self.image = self.__animation.current()
         self.rect = self.image.get_rect()
 
+
     def update(self):
         """Cập nhật vị trí và animation của Pacman sau mỗi frame"""
         self.update_position()
