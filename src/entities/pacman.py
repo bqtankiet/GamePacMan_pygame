@@ -16,6 +16,7 @@ class Pacman(pygame.sprite.Sprite):
         self.hitbox = pygame.Rect(0, 0, BLOCK_SIZE*SCALE, BLOCK_SIZE*SCALE)
         self.speed = 2
 
+
     def update(self):
         """Cập nhật vị trí và animation của Pacman sau mỗi frame"""
         self.update_position()

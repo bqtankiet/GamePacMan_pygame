@@ -39,18 +39,28 @@ class Maze:
         self.render()
 
     def update_pacman(self):
-        """Xử lý các logic cập nhật cho Pacman
-        (Xử lý hiện tại: Cập nhật hướng di chuyển của pacman nếu có thể. Cập nhật vị trí của Pacman, nếu va chạm tường thì quay lại vị trí trước đó)"""
+        """Xử lý các logic cập nhật cho Pacman"""
         old_position = self.pacman.rect.topleft
-
+        """Pacman tele khi đi vào đường tắt ( DONE )"""
         if self.can_move(self.pacman, self.pacman.next_direction):
             self.pacman.direction = self.pacman.next_direction
 
-        # TODO: Chưa xử lý khi Pacman đi ra khỏi rìa map
+        # Cập nhật vị trí Pacman dựa trên hướng hiện tại
         self.pacman.update()
 
+        # Kiểm tra va chạm tường, nếu có thì hoàn nguyên vị trí
         if self.collide_wall(self.pacman):
             self.pacman.rect.topleft = old_position
+
+        # Xử lý nếu Pacman ra ngoài biên trái hoặc phải của map
+        if self.pacman.rect.left < 0:
+            self.pacman.rect.right = len(self.grid[0]) * self.block_size_scaled
+        elif self.pacman.rect.right > len(self.grid[0]) * self.block_size_scaled:
+            self.pacman.rect.left = 0
+
+        # Kiểm tra lại hướng sau khi vượt biên map
+        if self.can_move(self.pacman, self.pacman.direction):
+            self.pacman.update()
 
     def add_pacman(self, pacman, position):
         """Thêm Pacman vào Mê cung"""
@@ -60,15 +70,17 @@ class Maze:
         pacman.rect.center = (x, y)
 
     def collide_wall(self, entity):
-        """Kiểm tra va chạm giữa thực thể và tường trong mê cung
-        Return True nếu va chạm xảy ra, ngược lại return False"""
+        """Kiểm tra va chạm giữa thực thể và tường trong mê cung"""
         hitbox = entity.get_hitbox()
         topleft = hitbox.topleft
-        topright = (hitbox.topright[0]-1, hitbox.topright[1])
-        bottomleft = (hitbox.bottomleft[0], hitbox.bottomleft[1]-1)
-        bottomright = (hitbox.bottomright[0]-1, hitbox.bottomright[1]-1)
+        topright = (hitbox.topright[0] - 1, hitbox.topright[1])
+        bottomleft = (hitbox.bottomleft[0], hitbox.bottomleft[1] - 1)
+        bottomright = (hitbox.bottomright[0] - 1, hitbox.bottomright[1] - 1)
+
         for corner in (topleft, topright, bottomleft, bottomright):
             r, c = self.pixel_to_grid(corner)
+            if r < 0 or r >= len(self.grid) or c < 0 or c >= len(self.grid[0]):  # Kiểm tra chỉ số
+                continue  # Bỏ qua nếu chỉ số không hợp lệ
             if self.grid[r][c] == Maze.WALL:
                 return True
         return False
@@ -99,6 +111,10 @@ class Maze:
         x, y = position
         r = int(y / self.block_size_scaled)
         c = int(x / self.block_size_scaled)
+
+        # Kiểm tra chỉ số trước khi trả về
+        if r < 0 or r >= len(self.grid) or c < 0 or c >= len(self.grid[0]):
+            return -1, -1  # Trả về chỉ số không hợp lệ
         return r, c
 
     def get_image(self):
