@@ -18,21 +18,29 @@ class Maze:
             self.update_entity(entity)
 
     def update_entity(self, entity):
+        # Xử lý khi pacman/ghost đi ra khỏi rìa map -> dịch chuyển
+        if entity.rect.right < 0:
+            entity.rect.left = self.get_width()
+        elif entity.rect.left > self.get_width():
+            entity.rect.right = 0
+
         # cập nhật hướng di chuyển của pacman/ghost
         old_position = entity.rect.topleft
-        if self.__collision_manager.can_move(entity, entity.get_next_direction()):
-            entity.change_direction()
-            
-        # Xử lý khi pacman/ghost đi ra khỏi rìa map -> dịch chuyển
-        if entity.rect.left < 0:
-            entity.rect.right = len(self.__grid[0]) * BLOCK_SIZE * SCALE
-        elif entity.rect.right > len(self.__grid[0]) * BLOCK_SIZE * SCALE:
-            entity.rect.left = 0
+        if not self.__collision_manager.is_out_of_map(entity):
+            if self.__collision_manager.can_move(entity, entity.get_next_direction()):
+                    entity.change_direction()
         
         # Cập nhật vị trí của pacman/ghost
         entity.update()
         if self.__collision_manager.is_collide_wall(entity):
             entity.rect.topleft = old_position
+
+
+    def get_width(self):
+        return len(self.__grid[0]) * BLOCK_SIZE * SCALE
+
+    def get_height(self):
+        return len(self.__grid) * BLOCK_SIZE * SCALE
 
     def add_pacman(self, pacman, position):
         """Thêm Pacman vào Mê cung"""
@@ -104,6 +112,11 @@ class CollisionManager:
         entity.rect.y = old_xy[1]
         return result
 
+    def is_out_of_map(self, entity):
+        width = len(self.__grid[0]) * self.__block_size_scaled
+        height = len(self.__grid) * self.__block_size_scaled
+        return not 0 < entity.rect.center[0] < width and 0 < entity.rect.center[1] < height
+
     def is_collide_wall(self, entity):
         """Kiểm tra va chạm giữa thực thể và tường"""
         hitbox = entity.get_hitbox()
@@ -115,6 +128,7 @@ class CollisionManager:
         ]
         for corner in corners:
             r, c = self.pixel_to_grid(corner)
+            if r < 0 or c < 0 or r >= len(self.__grid) or c >= len(self.__grid[0]): continue
             if self.__grid[r][c] == Maze.WALL:
                 return True
         return False
