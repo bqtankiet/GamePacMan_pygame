@@ -1,15 +1,19 @@
 import pygame
 
+from src.entities.pacman import Pacman
 from src.utils.constant import BLOCK_SIZE, SCALE, WIDTH, HEIGHT, MAZE_DATA
 from src.utils.enum import Direction
 from src.utils.image_loader import ImageLoader
+import src.utils.helper as helper
 
 
 class Maze:
     WALL = 1
+    PELLET = 2
+    POWER_PELLET = 3
 
     def __init__(self):
-        self.__grid = self.get_grid()
+        self.__grid = MAZE_DATA
         self.__entities = []
         self.__collision_manager = CollisionManager(self.__grid)
 
@@ -35,6 +39,12 @@ class Maze:
         if self.__collision_manager.is_collide_wall(entity):
             entity.rect.topleft = old_position
 
+        # Xử lý pacman ăn pellet
+        if isinstance(entity, Pacman):
+            r, c = helper.pixel_to_grid(entity.get_hitbox().center)
+            if self.__grid[r][c] == self.PELLET or self.__grid[r][c] == self.POWER_PELLET:
+                self.__grid[r][c] = 0
+
 
     def get_width(self):
         return len(self.__grid[0]) * BLOCK_SIZE * SCALE
@@ -45,7 +55,7 @@ class Maze:
     def add_pacman(self, pacman, position):
         """Thêm Pacman vào Mê cung"""
         self.__entities.append(pacman)
-        x, y = self.__collision_manager.grid_to_pixel(position)
+        x, y = helper.grid_to_pixel(position)
         pacman.get_hitbox().center = (x, y)
         pacman.rect.center = (x, y)
 
@@ -53,7 +63,7 @@ class Maze:
         return self.__entities
 
     def get_grid(self):
-        return MAZE_DATA
+        return self.__grid
 
 class CollisionManager:
     """Class phụ trách việc kiểm tra và xử lý chạm"""
@@ -95,24 +105,11 @@ class CollisionManager:
             (hitbox.bottomright[0] - 1, hitbox.bottomright[1] - 1)
         ]
         for corner in corners:
-            r, c = self.pixel_to_grid(corner)
+            r, c = helper.pixel_to_grid(corner)
             if r < 0 or c < 0 or r >= len(self.__grid) or c >= len(self.__grid[0]): continue
             if self.__grid[r][c] == Maze.WALL:
                 return True
         return False
-
-    def pixel_to_grid(self, position):
-        """Chuyển đổi pixel thành vị trí trong lưới"""
-        x, y = position
-        r = int(y / self.__block_size_scaled)
-        c = int(x / self.__block_size_scaled)
-        return r, c
-
-    def grid_to_pixel(self, position):
-        """Chuyển đổi vị trí ô trong lưới sang vị trí pixel"""
-        x = (position[1] * self.__block_size_scaled) + (self.__block_size_scaled / 2)
-        y = (position[0] * self.__block_size_scaled) + (self.__block_size_scaled / 2)
-        return x, y
 
 class MazeRender:
     def __init__(self, maze):
@@ -120,6 +117,7 @@ class MazeRender:
         self.__maze_surface = pygame.Surface((self.__maze_image.get_size()))
         self.__entities = pygame.sprite.Group(maze.get_entities())
         self.__area = self.__image.get_rect(center=(WIDTH / 2, HEIGHT / 2))
+        self.__maze = maze
 
     def render(self):
         self.draw_maze()
@@ -132,3 +130,11 @@ class MazeRender:
     def draw_maze(self):
         self.__maze_surface.fill("black")
         self.__maze_surface.blit(self.__maze_image, (0, 0))
+        grid = self.__maze.get_grid()
+        for r in range(len(grid)):
+            for c in range(len(grid[0])):
+                if grid[r][c] == 0:
+                    x = c * BLOCK_SIZE * SCALE
+                    y = r * BLOCK_SIZE * SCALE
+                    size = BLOCK_SIZE * SCALE
+                    pygame.draw.rect(self.__maze_surface, "black", (x, y, size, size))
