@@ -42,8 +42,9 @@ class Maze:
         # Xử lý pacman ăn pellet
         if isinstance(entity, Pacman):
             r, c = helper.pixel_to_grid(entity.get_hitbox().center)
-            if self.__grid[r][c] == self.PELLET or self.__grid[r][c] == self.POWER_PELLET:
-                self.__grid[r][c] = 0
+            if not self.__collision_manager.is_out_of_map(entity):
+                if self.__grid[r][c] == self.PELLET or self.__grid[r][c] == self.POWER_PELLET:
+                    self.__grid[r][c] = 0
 
 
     def get_width(self):
