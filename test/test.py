@@ -14,7 +14,7 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 running = False
             # update
-            image = ImageLoader().text_image("Hello World")
+            image = ImageLoader().ghost_r1('red', 'u2')
             screen.blit(image, (100, 100))
 
             # end update

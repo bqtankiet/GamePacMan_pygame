@@ -43,15 +43,13 @@ class Maze:
         if isinstance(entity, Pacman):
             r, c = helper.pixel_to_grid(entity.get_hitbox().center)
             if not self.__collision_manager.is_out_of_map(entity):
-                if self.__grid[r][c] == self.PELLET or self.__grid[r][c] == self.POWER_PELLET:
+                value = self.__grid[r][c]
+                if value == self.PELLET:
                     self.__grid[r][c] = 0
-
-
-    def get_width(self):
-        return len(self.__grid[0]) * BLOCK_SIZE * SCALE
-
-    def get_height(self):
-        return len(self.__grid) * BLOCK_SIZE * SCALE
+                if value == self.POWER_PELLET:
+                    self.__grid[r][c] = 0
+                    # TODO: Xử lý khi ăn hạt năng lượng lớn
+                    print("Eat Power pellet")
 
     def add_pacman(self, pacman, position):
         """Thêm Pacman vào Mê cung"""
@@ -65,6 +63,12 @@ class Maze:
 
     def get_grid(self):
         return self.__grid
+
+    def get_width(self):
+        return len(self.__grid[0]) * BLOCK_SIZE * SCALE
+
+    def get_height(self):
+        return len(self.__grid) * BLOCK_SIZE * SCALE
 
 class CollisionManager:
     """Class phụ trách việc kiểm tra và xử lý chạm"""
