@@ -24,6 +24,8 @@ class PauseGame(Scene):
         self.__highest_score = ImageLoader().text_image("1000") # TODO: Dữ liệu chỉ để test
         self.__time = ImageLoader().text_image("15'30") # TODO: Dữ liệu chỉ để test
 
+        self.__button_resume.focus()
+
         self.render_surface()
 
     #-----------------------------------------
