@@ -1,5 +1,6 @@
 import pygame
 
+import src.entities.ghost as ghost
 from src.entities.pacman import Pacman
 from src.utils.constant import BLOCK_SIZE, SCALE, WIDTH, HEIGHT, MAZE_DATA
 from src.utils.enum import Direction
@@ -51,7 +52,12 @@ class Maze:
                     # TODO: Xử lý khi ăn hạt năng lượng lớn
                     print("Eat Power pellet")
 
-    def add_pacman(self, pacman, position):
+        # Xử lý ghost
+        if isinstance(entity, ghost.Ghost):
+            entity.execute_ai(self.__collision_manager)
+
+
+    def add_entity(self, pacman, position):
         """Thêm Pacman vào Mê cung"""
         self.__entities.append(pacman)
         x, y = helper.grid_to_pixel(position)
