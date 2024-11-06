@@ -40,6 +40,10 @@ class GamePlay(Scene):
             self.__pacman.set_next_direction(Direction.UP)
         elif event.key == pygame.K_DOWN:
             self.__pacman.set_next_direction(Direction.DOWN)
+        elif event.key == pygame.K_ESCAPE:
+            self._game.switch_scene("PauseGame")
+        elif event.key == pygame.K_p:
+            self._game.switch_scene("GameOver")
 
     def update(self):
         self.__maze.update()

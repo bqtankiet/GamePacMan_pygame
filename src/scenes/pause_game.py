@@ -1,6 +1,6 @@
 import pygame.transform
 
-from src.scenes.component import TextButton
+from src.scenes.component import TextButton, ButtonGroup
 from src.scenes.scene import Scene
 from src.utils.constant import WIDTH, HEIGHT, SCALE
 from src.utils.image_loader import ImageLoader
@@ -11,22 +11,24 @@ class PauseGame(Scene):
 
     def __init__(self, game):
         super().__init__(game)
+        # Định nghĩa các label
         self.__title = pygame.transform.scale_by(ImageLoader().text_image("Pause Game", "yellow"), 2)
-
         self.__score_label = ImageLoader().text_image(" Current score", "cyan")
         self.__highest_score_label = ImageLoader().text_image("Highest Score", "cyan")
         self.__time_label = ImageLoader().text_image("Time", "cyan")
 
-        self.__button_resume = TextButton("Resume", action=lambda: print("Resume clicked"))
-        self.__button_main_menu = TextButton("Main Menu", action=lambda: print("Main Menu clicked"))
+        # Định nghĩa hành động cho các button
+        self.__button_resume = TextButton("Resume", action=lambda: self._game.switch_scene("GamePlay"))
+        self.__button_main_menu = TextButton("Main Menu", action=lambda: self._game.switch_scene("MainMenu"))
 
+        # ButtonGroup để quản lý các nút
+        self.__button_group = ButtonGroup([self.__button_resume, self.__button_main_menu])
+
+        # Tạo dữ liệu mẫu để test
         self.__score = ImageLoader().text_image("750") # TODO: Dữ liệu chỉ để test
         self.__highest_score = ImageLoader().text_image("1000") # TODO: Dữ liệu chỉ để test
         self.__time = ImageLoader().text_image("15'30") # TODO: Dữ liệu chỉ để test
 
-        self.__button_resume.focus()
-
-        self.render_surface()
 
     #-----------------------------------------
     # Các methods override của lớp cha (Scene)
@@ -74,34 +76,20 @@ class PauseGame(Scene):
         self.__button_main_menu.render(self._surface)
 
     def handle_event(self, event):
-        # TODO: Xử lý khi nhấn mũi tên xuống
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_DOWN:
-                self.__button_main_menu.focus()
-                self.__button_resume.blur()
-            # TODO: Xử lý khi nhấn mũi tên lên
+                self.__button_group.next()
             elif event.key == pygame.K_UP:
-                self.__button_resume.focus()
-                self.__button_main_menu.blur()
-            # TODO: Xử lý khi nhấn enter
+                self.__button_group.previous()
             elif event.key == pygame.K_RETURN:
-                if self.__button_resume.is_focused:
-                    print("Resume clicked")
-                    self._game.switch_scenes()
-                elif self.__button_main_menu.is_focused:
-                    print("Main Menu clicked")
-                    self._game.switch_scenes("MainScene")
+                self.__button_group.current().fire()
 
     def update(self):
-        # TODO: Xử lý cập nhật màn hình PauseGame sau mỗi frame
-        self.render_surface()  # Cập nhật nội dung hiển thị
-        # TODO: Xử lý để button đang chọn có thể nhấp nháy
-        if self.__button_resume.is_focused or self.__button_main_menu.is_focused:
-            self.__button_resume.update()
-            self.__button_main_menu.update()
+        self.__button_group.update() # Cập nhật lại trạng thái các button
+        self.render_surface() # Cập nhật lại giao diện
 
     def reset(self):
-        pass
+        self.__button_group.reset()
 
     #----------------------------------------
     # Các methods riêng của lớp

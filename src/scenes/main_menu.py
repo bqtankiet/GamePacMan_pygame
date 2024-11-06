@@ -16,12 +16,6 @@ class MainMenu(Scene):
         self.__button_exit = TextButton("Exit", action=lambda: self._game.exit())
         self.__button_group = ButtonGroup([self.__button_start, self.__button_exit])
 
-        self.__selected_button = self.__button_group.current()
-        self.__selected_button.focus()
-
-        self.render_surface()
-        self.buttons = [self.__button_start, self.__button_exit]
-        self.selected_button = 0  # Đặt chỉ số nút được chọn ban đầu
     #-----------------------------------------
     # Các methods override của lớp cha (Scene)
     #-----------------------------------------
@@ -43,36 +37,15 @@ class MainMenu(Scene):
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
-                self.enter()
+                self.__button_group.current().fire()
             elif event.key == pygame.K_DOWN:
-                self.navigate(1)
+                self.__button_group.next()
             elif event.key == pygame.K_UP:
-                self.navigate(-1)
+                self.__button_group.previous()
 
     def update(self):
-        self.__selected_button.update()
-        self.render_surface()
+        self.__button_group.update() # Cập nhật lại trạng thái các button
+        self.render_surface() # Cập nhật lại giao diện
 
     def reset(self):
         self.__button_group.reset()
-        self.__selected_button = self.__button_group.current()
-
-    #----------------------------------------
-    # Các methods riêng của lớp MainMenu
-    #----------------------------------------
-    def navigate(self, direction):
-        # Xóa focus cũ
-        self.__selected_button.blur()
-
-        # chọn button mới
-        if direction > 0:
-            self.__button_group.next()
-        elif direction < 0:
-            self.__button_group.previous()
-        self.__selected_button = self.__button_group.current()
-
-        # Focus vào button đang chọn
-        self.__selected_button.focus()
-
-    def enter(self):
-        self.__selected_button.fire()

@@ -63,15 +63,21 @@ class ButtonGroup:
         return self.__buttons[self.__index]
 
     def next(self):
-        self.__index += 1
-        if self.__index >= len(self.__buttons): self.__index = 0
+        self.__index = (self.__index + 1) % len(self.__buttons)
         return self.__buttons[self.__index]
 
     def previous(self):
-        self.__index -= 1
-        if self.__index < 0:
-            self.__index = len(self.__buttons) - 1  # Trở lại nút cuối cùng
+        self.__index = (self.__index - 1) % len(self.__buttons)
         return self.__buttons[self.__index]
 
     def reset(self):
+        # Đặt về nút ban đầu và làm mờ các nút
         self.__index = 0
+        for button in self.__buttons:
+            button.blur()
+
+    def update(self):
+        for button in self.__buttons: # Mờ tất cả các nút
+            button.blur()
+        self.current().focus() # Tập trung vào nút đang được chọn
+        self.current().update() # Cập nhật hiệu ứng nhấp nháy cho nút

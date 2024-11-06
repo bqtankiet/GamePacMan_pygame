@@ -3,8 +3,10 @@ import sys
 import pygame
 
 import src.utils.constant as const
+from src.scenes.game_over import GameOver
 from src.scenes.gameplay import GamePlay
 from src.scenes.main_menu import MainMenu
+from src.scenes.pause_game import PauseGame
 
 
 class Game:
@@ -19,7 +21,9 @@ class Game:
         self.screen = pygame.display.set_mode((const.WIDTH, const.HEIGHT), pygame.FULLSCREEN)
         self.scenes = {
             "MainMenu": MainMenu(self),
-            "GamePlay": GamePlay(self)
+            "GamePlay": GamePlay(self),
+            "GameOver": GameOver(self),
+            "PauseGame": PauseGame(self),
             # other screens go here
         }
         self.current_scene = self.scenes["MainMenu"]
