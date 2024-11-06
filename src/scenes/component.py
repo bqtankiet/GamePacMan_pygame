@@ -50,7 +50,9 @@ class TextButton:
         self.__image = self.__default_img
 
     def fire(self):
-        if self.action: self.action()
+        if self.action:
+            print(f"Action for '{self.__rect}' triggered.")  # Thêm log
+            self.action()
 
 class ButtonGroup:
     def __init__(self, buttons):
@@ -61,11 +63,21 @@ class ButtonGroup:
         return self.__buttons[self.__index]
 
     def next(self):
-        self.__index += 1
-        if self.__index >= len(self.__buttons): self.__index = 0
+        self.__index = (self.__index + 1) % len(self.__buttons)
         return self.__buttons[self.__index]
 
     def previous(self):
-        self.__index -= 1
-        if self.__index < 0: self.__index = -1
+        self.__index = (self.__index - 1) % len(self.__buttons)
         return self.__buttons[self.__index]
+
+    def reset(self):
+        # Đặt về nút ban đầu và làm mờ các nút
+        self.__index = 0
+        for button in self.__buttons:
+            button.blur()
+
+    def update(self):
+        for button in self.__buttons: # Mờ tất cả các nút
+            button.blur()
+        self.current().focus() # Tập trung vào nút đang được chọn
+        self.current().update() # Cập nhật hiệu ứng nhấp nháy cho nút

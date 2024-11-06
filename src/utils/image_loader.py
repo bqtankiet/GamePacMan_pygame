@@ -170,6 +170,28 @@ class ImageLoader:
         img = pygame.transform.scale_by(img, SCALE)
         return img
 
+    # Ghost
+    def ghost(self, color, direction):
+        y_index = -1
+        if color == 'red': y_index = 0
+        if color == 'pink': y_index = 1
+        if color == 'cyan': y_index = 2
+        if color == 'orange': y_index = 3
+
+        x_index = -1
+        if direction == 'r1': x_index = 0
+        if direction == 'r2': x_index = 1
+        if direction == 'l1': x_index = 2
+        if direction == 'l2': x_index = 3
+        if direction == 'u1': x_index = 4
+        if direction == 'u2': x_index = 5
+        if direction == 'd1': x_index = 6
+        if direction == 'd2': x_index = 7
+
+        img = self.general_sprites.subsurface(456+(16*x_index), 64+(16*y_index), 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
     # Text
     def text_image(self, text, color='white'):
         text = text.upper()
@@ -181,6 +203,8 @@ class ImageLoader:
                 pos = {'line': 1, 'index': ord(char) - ord('P')}
             elif char in "0123456789":
                 pos = {'line': 2, 'index': ord(char) - ord('0')}
+            elif char in "'":
+                pos = {'line': 2, 'index': 12}
             else:
                 continue  # Nếu không phải 'chữ' hoặc 'số' thì duyệt qua kí tự tiếp theo
 

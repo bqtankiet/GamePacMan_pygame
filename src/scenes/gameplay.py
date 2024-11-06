@@ -1,5 +1,6 @@
 import pygame
 
+from src.entities.ghost import Ghost
 from src.entities.maze import Maze, MazeRender
 from src.entities.pacman import Pacman
 from src.scenes.scene import Scene
@@ -13,8 +14,11 @@ class GamePlay(Scene):
     def __init__(self, game):
         super().__init__(game)
         self.__pacman = Pacman()
+        self.__ghost = Ghost()
+
         self.__maze = Maze()
-        self.__maze.add_pacman(self.__pacman, (23, 14))
+        self.__maze.add_entity(self.__ghost, (1, 1))
+        self.__maze.add_entity(self.__pacman, (23, 14))
         self.__maze_render = MazeRender(self.__maze)
 
     #-----------------------------------------
@@ -36,6 +40,10 @@ class GamePlay(Scene):
             self.__pacman.set_next_direction(Direction.UP)
         elif event.key == pygame.K_DOWN:
             self.__pacman.set_next_direction(Direction.DOWN)
+        elif event.key == pygame.K_ESCAPE:
+            self._game.switch_scene("PauseGame")
+        elif event.key == pygame.K_p:
+            self._game.switch_scene("GameOver")
 
     def update(self):
         self.__maze.update()
