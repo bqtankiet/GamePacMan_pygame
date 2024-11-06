@@ -203,6 +203,8 @@ class ImageLoader:
                 pos = {'line': 1, 'index': ord(char) - ord('P')}
             elif char in "0123456789":
                 pos = {'line': 2, 'index': ord(char) - ord('0')}
+            elif char in "'":
+                pos = {'line': 2, 'index': 12}
             else:
                 continue  # Nếu không phải 'chữ' hoặc 'số' thì duyệt qua kí tự tiếp theo
 
