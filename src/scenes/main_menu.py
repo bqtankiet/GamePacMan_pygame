@@ -20,7 +20,8 @@ class MainMenu(Scene):
         self.__selected_button.focus()
 
         self.render_surface()
-
+        self.buttons = [self.__button_start, self.__button_exit]
+        self.selected_button = 0  # Đặt chỉ số nút được chọn ban đầu
     #-----------------------------------------
     # Các methods override của lớp cha (Scene)
     #-----------------------------------------
@@ -53,7 +54,8 @@ class MainMenu(Scene):
         self.render_surface()
 
     def reset(self):
-        pass
+        self.__button_group.reset()
+        self.__selected_button = self.__button_group.current()
 
     #----------------------------------------
     # Các methods riêng của lớp MainMenu

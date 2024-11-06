@@ -25,6 +25,11 @@ class Game:
         self.current_scene = self.scenes["MainMenu"]
         self.running = True
 
+    def switch_scene(self, scene_name):
+        if scene_name in self.scenes:
+            self.current_scene = self.scenes[scene_name]
+            self.current_scene.reset()  # Đặt lại màn hình mới
+
     def run(self):
         """Game loop chính"""
         while self.running:
@@ -43,5 +48,3 @@ class Game:
     def exit(self):
         self.running = False
 
-    def switch_scene(self, scene_name):
-        self.current_scene = self.scenes[scene_name]

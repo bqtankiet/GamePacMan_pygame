@@ -50,7 +50,9 @@ class TextButton:
         self.__image = self.__default_img
 
     def fire(self):
-        if self.action: self.action()
+        if self.action:
+            print(f"Action for '{self.__rect}' triggered.")  # Thêm log
+            self.action()
 
 class ButtonGroup:
     def __init__(self, buttons):
@@ -67,5 +69,9 @@ class ButtonGroup:
 
     def previous(self):
         self.__index -= 1
-        if self.__index < 0: self.__index = -1
+        if self.__index < 0:
+            self.__index = len(self.__buttons) - 1  # Trở lại nút cuối cùng
         return self.__buttons[self.__index]
+
+    def reset(self):
+        self.__index = 0
