@@ -3,8 +3,10 @@ import sys
 import pygame
 
 import src.utils.constant as const
+from src.scenes.game_over import GameOver
 from src.scenes.gameplay import GamePlay
 from src.scenes.main_menu import MainMenu
+from src.scenes.pause_game import PauseGame
 
 
 class Game:
@@ -19,11 +21,18 @@ class Game:
         self.screen = pygame.display.set_mode((const.WIDTH, const.HEIGHT), pygame.FULLSCREEN)
         self.scenes = {
             "MainMenu": MainMenu(self),
-            "GamePlay": GamePlay(self)
+            "GamePlay": GamePlay(self),
+            "GameOver": GameOver(self),
+            "PauseGame": PauseGame(self),
             # other screens go here
         }
         self.current_scene = self.scenes["MainMenu"]
         self.running = True
+
+    def switch_scene(self, scene_name):
+        if scene_name in self.scenes:
+            self.current_scene = self.scenes[scene_name]
+            self.current_scene.reset()  # Đặt lại màn hình mới
 
     def run(self):
         """Game loop chính"""
@@ -43,5 +52,3 @@ class Game:
     def exit(self):
         self.running = False
 
-    def switch_scene(self, scene_name):
-        self.current_scene = self.scenes[scene_name]
