@@ -52,3 +52,5 @@ class Game:
     def exit(self):
         self.running = False
 
+    def new_game(self):
+        self.scenes["GamePlay"] = GamePlay(self)

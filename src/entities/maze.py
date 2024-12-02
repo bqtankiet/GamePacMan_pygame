@@ -1,3 +1,5 @@
+import copy
+
 import pygame
 
 import src.entities.ghost as ghost
@@ -14,7 +16,7 @@ class Maze:
     POWER_PELLET = 3
 
     def __init__(self):
-        self.__grid = MAZE_DATA
+        self.__grid = copy.deepcopy(MAZE_DATA)
         self.__entities = []
         self.__collision_manager = CollisionManager(self.__grid)
 
