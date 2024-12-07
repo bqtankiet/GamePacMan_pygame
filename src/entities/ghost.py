@@ -6,6 +6,7 @@ from src.entities.animation import Animation
 from src.utils.astar_pathfinding import AStarPathfinding
 from src.utils.constant import BLOCK_SIZE, SCALE
 from src.utils.enum import Direction
+import src.utils.debugger as debugger
 
 
 class Ghost(Sprite):
@@ -33,6 +34,7 @@ class GhostRed(Ghost):
             ramdom_choice = random.choice(range(0,4))
             self.set_next_direction(directs[ramdom_choice])
         if path is not None and len(path) > 0:
+            debugger.set_attributes('path', path)
             next = path[0].position
             dx = next[0] - self.get_position()[0]
             dy = next[1] - self.get_position()[1]

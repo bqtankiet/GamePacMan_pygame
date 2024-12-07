@@ -8,6 +8,7 @@ from src.utils.constant import BLOCK_SIZE, SCALE, WIDTH, HEIGHT, MAZE_DATA
 from src.utils.enum import Direction
 from src.utils.image_loader import ImageLoader
 import src.utils.helper as helper
+import src.utils.debugger as debugger
 
 
 class Maze:
@@ -72,7 +73,9 @@ class Maze:
                 entity.execute_ai(self.__pacman.get_position())
 
     def add_entity(self, entity, position):
-        if isinstance(entity, Pacman): self.__pacman = entity
+        if isinstance(entity, Pacman):
+            debugger.set_attributes('hitbox', entity)
+            self.__pacman = entity
         elif isinstance(entity, ghost.Ghost): self.__ghosts.append(entity)
         x, y = helper.grid_to_pixel(position)
         entity.get_hitbox().center = (x, y)
@@ -149,6 +152,7 @@ class MazeRender:
     def render(self):
         self.draw_maze()
         self.draw_entities()
+        debugger.render(self.__maze_surface)
         return self.__maze_surface
 
     def draw_entities(self):

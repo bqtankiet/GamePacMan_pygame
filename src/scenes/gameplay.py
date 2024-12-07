@@ -6,6 +6,7 @@ from src.entities.pacman import Pacman
 from src.scenes.scene import Scene
 from src.utils.constant import WIDTH, HEIGHT
 from src.utils.enum import Direction
+import src.utils.debugger as debugger
 
 
 class GamePlay(Scene):
@@ -44,6 +45,9 @@ class GamePlay(Scene):
             self._game.switch_scene("PauseGame")
         elif event.key == pygame.K_p:
             self._game.switch_scene("GameOver")
+
+        # debug
+        debugger.handle_event(event)
 
     def update(self):
         self.__maze.update()
