@@ -44,8 +44,15 @@ class Maze:
 
         # Xử lý pacman ăn pellet
         if isinstance(entity, Pacman):
-            r, c = helper.pixel_to_grid(entity.get_hitbox().center)
-            if not self.__collision_manager.is_out_of_map(entity):
+            pacman = entity
+            print(pacman.get_position())
+            for e in self.__entities:
+                if isinstance(e, ghost.Ghost) and pacman.collide(e):
+                    # TODO: Xử lý khi pacman va chạm ghost
+                    print("Pacman collide ghost")
+
+            r, c = helper.pixel_to_grid(pacman.get_hitbox().center)
+            if not self.__collision_manager.is_out_of_map(pacman):
                 value = self.__grid[r][c]
                 if value == self.PELLET:
                     self.__grid[r][c] = 0
@@ -59,12 +66,11 @@ class Maze:
             entity.execute_ai(self.__collision_manager)
 
 
-    def add_entity(self, pacman, position):
-        """Thêm Pacman vào Mê cung"""
-        self.__entities.append(pacman)
+    def add_entity(self, entity, position):
+        self.__entities.append(entity)
         x, y = helper.grid_to_pixel(position)
-        pacman.get_hitbox().center = (x, y)
-        pacman.rect.center = (x, y)
+        entity.get_hitbox().center = (x, y)
+        entity.rect.center = (x, y)
 
     def get_entities(self):
         return self.__entities

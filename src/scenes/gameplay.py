@@ -1,6 +1,6 @@
 import pygame
 
-from src.entities.ghost import Ghost
+from src.entities.ghost import Ghost, GhostRed
 from src.entities.maze import Maze, MazeRender
 from src.entities.pacman import Pacman
 from src.scenes.scene import Scene
@@ -14,7 +14,7 @@ class GamePlay(Scene):
     def __init__(self, game):
         super().__init__(game)
         self.__pacman = Pacman()
-        self.__ghost = Ghost()
+        self.__ghost = GhostRed()
 
         self.__maze = Maze()
         self.__maze.add_entity(self.__ghost, (1, 1))

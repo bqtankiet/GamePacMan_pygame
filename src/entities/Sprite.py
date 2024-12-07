@@ -2,6 +2,7 @@ import pygame.sprite
 from pygame.examples.cursors import image
 
 from src.entities.animation import Animation
+from src.utils.constant import MAZE_DATA, BLOCK_SIZE, SCALE
 from src.utils.enum import Direction
 
 
@@ -31,6 +32,10 @@ class Sprite(pygame.sprite.Sprite):
     def get_hitbox(self):
         self._hitbox.center = self.rect.center
         return self._hitbox
+
+    def get_position(self):
+        return (int(self.rect.center[0] / (BLOCK_SIZE*SCALE)),
+                int(self.rect.center[1] / (BLOCK_SIZE*SCALE)))
 
     def collide(self, sprite):
         """Phương thức kiểm tra va chạm giữa 2 sprite
