@@ -17,12 +17,16 @@ class Maze:
 
     def __init__(self):
         self.__grid = copy.deepcopy(MAZE_DATA)
-        self.__entities = []
+        # self.__entities = []
         self.__collision_manager = CollisionManager(self.__grid)
+        self.__pacman = None
+        self.__ghosts = []
 
     def update(self):
-        for entity in self.__entities:
-            self.update_entity(entity)
+        # update pacman
+        self.update_entity(self.__pacman)
+        # update ghosts
+        for g in self.__ghosts: self.update_entity(g)
 
     def update_entity(self, entity):
         # Xử lý khi pacman/ghost đi ra khỏi rìa map -> dịch chuyển
@@ -45,9 +49,8 @@ class Maze:
         # Xử lý pacman ăn pellet
         if isinstance(entity, Pacman):
             pacman = entity
-            print(pacman.get_position())
-            for e in self.__entities:
-                if isinstance(e, ghost.Ghost) and pacman.collide(e):
+            for g in self.__ghosts:
+                if pacman.collide(g):
                     # TODO: Xử lý khi pacman va chạm ghost
                     print("Pacman collide ghost")
 
@@ -61,19 +64,24 @@ class Maze:
                     # TODO: Xử lý khi ăn hạt năng lượng lớn
                     print("Eat Power pellet")
 
+        print(self.__pacman.get_position())
         # Xử lý ghost
         if isinstance(entity, ghost.Ghost):
-            entity.execute_ai(self.__collision_manager)
-
+            # entity.execute_ai(self.__pacman.get_position())
+            if not self.__collision_manager.is_out_of_map(self.__pacman):
+                entity.execute_ai(self.__pacman.get_position())
 
     def add_entity(self, entity, position):
-        self.__entities.append(entity)
+        if isinstance(entity, Pacman): self.__pacman = entity
+        elif isinstance(entity, ghost.Ghost): self.__ghosts.append(entity)
         x, y = helper.grid_to_pixel(position)
         entity.get_hitbox().center = (x, y)
         entity.rect.center = (x, y)
 
     def get_entities(self):
-        return self.__entities
+        entities = [g for g in self.__ghosts]
+        entities.append(self.__pacman)
+        return entities
 
     def get_grid(self):
         return self.__grid
