@@ -38,10 +38,7 @@ class GhostRed(Ghost):
             next = path[0].position
             dx = next[0] - self.get_position()[0]
             dy = next[1] - self.get_position()[1]
-            print(self.get_position(), next)
-            print(dx, dy)
             if dx > 0: self.set_next_direction(Direction.RIGHT)
             elif dx < 0: self.set_next_direction(Direction.LEFT)
             elif dy > 0: self.set_next_direction(Direction.DOWN)
             elif dy < 0: self.set_next_direction(Direction.UP)
-            print(self._next_direction)

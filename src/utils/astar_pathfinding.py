@@ -7,6 +7,7 @@ class AStarPathfinding:
     #     self.__grid = grid
 
     def execute(self, start, dest):
+        explored = set()
         pq = PriorityQueue()
         node = Node(start)
         node.hCost = abs(dest[0]-start[0]) + abs(dest[1]-start[1])
@@ -14,9 +15,11 @@ class AStarPathfinding:
         pq.push(node.get_fCost(), node)
         while not pq.is_empty():
             current_node = pq.pop()
+            explored.add(current_node.position)
             print(current_node.position)
             if current_node.hCost == 0: return self.build_path(current_node)
             for n in current_node.get_neighbors():
+                if n.position in explored: continue
                 n.parent = current_node
                 n.gCost = current_node.gCost+1
                 n.hCost = abs(dest[0]-n.position[0]) + abs(dest[1]-n.position[1])
@@ -92,7 +95,8 @@ class PriorityQueue:
         return any(entry[1] == item for entry in self.heap)
 
 if __name__ == '__main__':
-    pq = PriorityQueue()
-    pq.push(1, Node((1,1)))
-    pq.push(2, Node((2,1)))
+    start = (1, 1)
+    dest = (0, 0)
+    path = AStarPathfinding().execute(start, dest)
+    print(path)
 

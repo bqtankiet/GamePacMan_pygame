@@ -3,6 +3,7 @@ import copy
 import pygame
 
 import src.entities.ghost as ghost
+import src.core.game as game
 from src.entities.pacman import Pacman
 from src.utils.constant import BLOCK_SIZE, SCALE, WIDTH, HEIGHT, MAZE_DATA
 from src.utils.enum import Direction
@@ -15,15 +16,26 @@ class Maze:
     WALL = 1
     PELLET = 2
     POWER_PELLET = 3
+    READY = 0
+    PLAYING = 1
 
-    def __init__(self):
+    def __init__(self, game):
         self.__grid = copy.deepcopy(MAZE_DATA)
         # self.__entities = []
         self.__collision_manager = CollisionManager(self.__grid)
         self.__pacman = None
         self.__ghosts = []
+        self.__start_time = pygame.time.get_ticks()
+        self.__state = Maze.READY
+        self.game = game
 
     def update(self):
+        current_time = pygame.time.get_ticks()
+        if self.__state == Maze.READY:
+            if current_time - self.__start_time > 3000:
+                self.__state = Maze.PLAYING
+            return
+
         # update pacman
         self.update_entity(self.__pacman)
         # update ghosts
@@ -59,18 +71,22 @@ class Maze:
             if not self.__collision_manager.is_out_of_map(pacman):
                 value = self.__grid[r][c]
                 if value == self.PELLET:
+                    # TODO: Xử lý khi ăn hạt thường
                     self.__grid[r][c] = 0
+                    self.game.game_status.increase_score(game.GameStatus.SCORE_PELLET)
                 if value == self.POWER_PELLET:
                     self.__grid[r][c] = 0
                     # TODO: Xử lý khi ăn hạt năng lượng lớn
+                    self.game.game_status.increase_score(game.GameStatus.SCORE_POWER_PELLET)
                     print("Eat Power pellet")
 
         print(self.__pacman.get_position())
         # Xử lý ghost
         if isinstance(entity, ghost.Ghost):
-            # entity.execute_ai(self.__pacman.get_position())
+            # dest = self.__pacman.get_position()
+            dest = (14, 14)
             if not self.__collision_manager.is_out_of_map(self.__pacman):
-                entity.execute_ai(self.__pacman.get_position())
+                entity.execute_ai(dest)
 
     def add_entity(self, entity, position):
         if isinstance(entity, Pacman):
@@ -94,6 +110,14 @@ class Maze:
 
     def get_height(self):
         return len(self.__grid) * BLOCK_SIZE * SCALE
+
+    def get_state(self):
+        return self.__state
+
+    def set_state(self, state):
+        self.__state = state
+        if state == Maze.READY:
+            self.__start_time = pygame.time.get_ticks()
 
 class CollisionManager:
     """Class phụ trách việc kiểm tra và xử lý chạm"""
@@ -153,7 +177,17 @@ class MazeRender:
         self.draw_maze()
         self.draw_entities()
         debugger.render(self.__maze_surface)
+
+        if self.__maze.get_state() == Maze.READY:
+            self.draw_ready_message()
+
         return self.__maze_surface
+
+    def draw_ready_message(self):
+        message = ImageLoader().text_image("ready!")
+        x = self.__maze.get_width()//2
+        y = self.__maze.get_height()//2 + message.get_height()*2
+        self.__maze_surface.blit(message, message.get_rect(center=(x, y)))
 
     def draw_entities(self):
         self.__entities.draw(self.__maze_surface)

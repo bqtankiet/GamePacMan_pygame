@@ -205,6 +205,8 @@ class ImageLoader:
                 pos = {'line': 2, 'index': ord(char) - ord('0')}
             elif char in "'":
                 pos = {'line': 2, 'index': 12}
+            elif char in "!":
+                pos = {'line': 1, 'index': 11}
             else:
                 continue  # Nếu không phải 'chữ' hoặc 'số' thì duyệt qua kí tự tiếp theo
 

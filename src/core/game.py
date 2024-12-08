@@ -17,6 +17,7 @@ class Game:
         pygame.display.set_caption('PacMan')
 
         # init attributes
+        self.game_status = GameStatus(self)
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((const.WIDTH, const.HEIGHT), pygame.FULLSCREEN)
         self.scenes = {
@@ -54,3 +55,27 @@ class Game:
 
     def new_game(self):
         self.scenes["GamePlay"] = GamePlay(self)
+
+
+
+class GameStatus:
+    SCORE_PELLET = 10
+    SCORE_POWER_PELLET = 100
+    SCORE_GHOST = 200
+    def __init__(self, game):
+        self.game = game
+        self.score = 0
+        self.time = 0
+        self.start = 0
+
+    def current_time(self):
+        total_secs = (pygame.time.get_ticks() - self.start)//1000
+        minutes = total_secs // 60
+        seconds = total_secs % 60
+        return minutes, seconds
+
+    def current_score(self):
+        return self.score
+
+    def increase_score(self, score):
+        self.score += score
