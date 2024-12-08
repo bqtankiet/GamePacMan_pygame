@@ -67,6 +67,7 @@ class GameStatus:
         self.score = 0
         self.time = 0
         self.start = 0
+        self.best_score = 0
 
     def current_time(self):
         total_secs = (pygame.time.get_ticks() - self.start)//1000
@@ -79,3 +80,8 @@ class GameStatus:
 
     def increase_score(self, score):
         self.score += score
+        if self.score > self.best_score:
+            self.best_score = self.score
+
+    def highest_score(self):
+        return self.best_score

@@ -66,6 +66,8 @@ class Maze:
                 if pacman.collide(g):
                     # TODO: Xử lý khi pacman va chạm ghost
                     print("Pacman collide ghost")
+                    if g.is_frightened: print("Pacman eat ghost")
+                    else: print("Pacman die")
 
             r, c = helper.pixel_to_grid(pacman.get_hitbox().center)
             if not self.__collision_manager.is_out_of_map(pacman):
@@ -78,13 +80,14 @@ class Maze:
                     self.__grid[r][c] = 0
                     # TODO: Xử lý khi ăn hạt năng lượng lớn
                     self.game.game_status.increase_score(game.GameStatus.SCORE_POWER_PELLET)
+                    for g in self.__ghosts: g.frightened()
                     print("Eat Power pellet")
 
         print(self.__pacman.get_position())
         # Xử lý ghost
         if isinstance(entity, ghost.Ghost):
-            # dest = self.__pacman.get_position()
-            dest = (14, 14)
+            dest = self.__pacman.get_position()
+            # dest = (14, 14)
             if not self.__collision_manager.is_out_of_map(self.__pacman):
                 entity.execute_ai(dest)
 

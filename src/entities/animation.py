@@ -1,4 +1,3 @@
-import src.entities as entities
 from src.utils.enum import Direction
 from src.utils.image_loader import ImageLoader
 
@@ -16,6 +15,8 @@ class Animation:
         if sprite_name.lower() == "ghost_pink": self.sprites = self.SpriteSheets.ghost('pink')
         if sprite_name.lower() == "ghost_orange": self.sprites = self.SpriteSheets.ghost('orange')
         if sprite_name.lower() == "ghost_cyan": self.sprites = self.SpriteSheets.ghost('cyan')
+        if sprite_name.lower() == "frightened": self.sprites = self.SpriteSheets.frightened()
+        if sprite_name.lower() == "frightened_flash": self.sprites = self.SpriteSheets.frightened_flash()
 
 
     def next(self):
@@ -57,4 +58,26 @@ class Animation:
                 Direction.RIGHT: (img.ghost(color, 'r1'), img.ghost(color, 'r2')),
                 Direction.UP: (img.ghost(color, 'u1'), img.ghost(color, 'u2')),
                 Direction.DOWN: (img.ghost(color, 'd1'), img.ghost(color, 'd2')),
+            }
+
+        @staticmethod
+        def frightened():
+            img = ImageLoader()
+            tmp = (img.frightened_1(), img.frightened_2())
+            return {
+                Direction.LEFT: tmp,
+                Direction.RIGHT: tmp,
+                Direction.UP: tmp,
+                Direction.DOWN: tmp,
+            }
+
+        @staticmethod
+        def frightened_flash():
+            img = ImageLoader()
+            tmp = (img.frightened_1(),  img.frightened_2('white'), img.frightened_1('white'), img.frightened_2())
+            return {
+                Direction.LEFT: tmp,
+                Direction.RIGHT: tmp,
+                Direction.UP: tmp,
+                Direction.DOWN: tmp,
             }

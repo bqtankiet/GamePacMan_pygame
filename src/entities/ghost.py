@@ -12,14 +12,35 @@ import src.utils.debugger as debugger
 class Ghost(Sprite):
     def __init__(self, animation, hitbox):
         self.algo = AStarPathfinding()
+        self.is_frightened = False
+        self.last_frightened = 0
+        self.frightened_duration = 5
+        self.is_frightened_flash = False
         super().__init__(animation, hitbox)
 
     def update(self):
         self.update_position()
         self._animation.update()
+        if self.is_frightened:
+            duration = (pygame.time.get_ticks() - self.last_frightened)//1000
+            if duration > self.frightened_duration-2 and not self.is_frightened_flash:
+                self._animation = Animation(self, 'frightened_flash')
+                self.is_frightened_flash = True
+            if duration > self.frightened_duration:
+                self.is_frightened_flash = False
+                self.is_frightened = False
+                self._animation = Animation(self, self.name())
 
     def execute_ai(self, dest):
         pass
+
+    def name(self):
+        pass
+
+    def frightened(self):
+        self.is_frightened = True
+        self.last_frightened = pygame.time.get_ticks()
+        self._animation = Animation(self, 'frightened')
 
 class GhostRed(Ghost):
     def __init__(self):
@@ -42,3 +63,5 @@ class GhostRed(Ghost):
             elif dx < 0: self.set_next_direction(Direction.LEFT)
             elif dy > 0: self.set_next_direction(Direction.DOWN)
             elif dy < 0: self.set_next_direction(Direction.UP)
+
+    def name(self): return 'ghost_red'
