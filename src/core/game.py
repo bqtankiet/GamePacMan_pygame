@@ -4,7 +4,7 @@ import pygame
 
 import src.utils.constant as const
 from src.scenes.game_over import GameOver
-from src.scenes.gameplay import GamePlay
+import src.scenes.gameplay as gp
 from src.scenes.main_menu import MainMenu
 from src.scenes.pause_game import PauseGame
 
@@ -22,7 +22,7 @@ class Game:
         self.screen = pygame.display.set_mode((const.WIDTH, const.HEIGHT), pygame.FULLSCREEN)
         self.scenes = {
             "MainMenu": MainMenu(self),
-            "GamePlay": GamePlay(self),
+            "GamePlay": gp.GamePlay(self),
             "GameOver": GameOver(self),
             "PauseGame": PauseGame(self),
             # other screens go here
@@ -54,7 +54,7 @@ class Game:
         self.running = False
 
     def new_game(self):
-        self.scenes["GamePlay"] = GamePlay(self)
+        self.scenes["GamePlay"] = gp.GamePlay(self)
 
 
 
@@ -62,15 +62,36 @@ class GameStatus:
     SCORE_PELLET = 10
     SCORE_POWER_PELLET = 100
     SCORE_GHOST = 200
+
     def __init__(self, game):
         self.game = game
         self.score = 0
-        self.time = 0
         self.start = 0
         self.best_score = 0
+        self.total_pause_duration = 0
+        self.pause_start = None
+
+    def start_game(self):
+        self.start = pygame.time.get_ticks()
+        self.total_pause_duration = 0
+        self.pause_start = None
+
+    def pause(self):
+        if self.pause_start is None:
+            self.pause_start = pygame.time.get_ticks()
+
+    def resume(self):
+        if self.pause_start is not None:
+            self.total_pause_duration += pygame.time.get_ticks() - self.pause_start
+            self.pause_start = None
 
     def current_time(self):
-        total_secs = (pygame.time.get_ticks() - self.start)//1000
+        if self.start == 0:
+            return 0, 0
+
+        elapsed_time = pygame.time.get_ticks() - self.start - self.total_pause_duration
+
+        total_secs = elapsed_time // 1000
         minutes = total_secs // 60
         seconds = total_secs % 60
         return minutes, seconds

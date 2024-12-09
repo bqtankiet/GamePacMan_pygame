@@ -21,8 +21,7 @@ class GamePlay(Scene):
         self.__maze.add_entity(self.__ghost, RedAIStrategy.SPAWN_POS)
         self.__maze.add_entity(self.__pacman, (23, 14))
         self.__maze_render = MazeRender(self.__maze)
-        self._game.game_status.start = pygame.time.get_ticks()
-        self._game.game_status.score = 0
+        self._game.game_status.start_game()
     #-----------------------------------------
     # Các methods override của lớp cha (Scene)
     #-----------------------------------------
@@ -45,6 +44,7 @@ class GamePlay(Scene):
         elif event.key == pygame.K_DOWN:
             self.__pacman.set_next_direction(Direction.DOWN)
         elif event.key == pygame.K_ESCAPE:
+            self._game.game_status.pause()
             self._game.switch_scene("PauseGame")
         elif event.key == pygame.K_p:
             self._game.switch_scene("GameOver")
@@ -58,6 +58,7 @@ class GamePlay(Scene):
 
     def reset(self):
         self.__maze.set_state(Maze.READY)
+        self._game.game_status.resume()
 
     #----------------------------------------
     # Các methods riêng của lớp GamePlay

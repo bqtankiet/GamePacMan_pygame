@@ -90,6 +90,13 @@ class PauseGame(Scene):
 
     def reset(self):
         self.__button_group.reset()
+        current_time = self._game.game_status.current_time()
+        score = self._game.game_status.current_score()
+        highest_score = self._game.game_status.highest_score()
+        self.__score = ImageLoader().text_image(f'{score}')
+        self.__highest_score = ImageLoader().text_image(f'{highest_score}')
+        self.__time = ImageLoader().text_image(f"{current_time[0]}'{current_time[1]:02}")
+
 
     #----------------------------------------
     # Các methods riêng của lớp
