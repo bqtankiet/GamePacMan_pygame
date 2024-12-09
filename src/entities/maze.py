@@ -4,6 +4,7 @@ import pygame
 
 import src.entities.ghost as ghost
 import src.core.game as game
+from src.entities.Sprite import Sprite
 from src.entities.pacman import Pacman
 from src.utils.constant import BLOCK_SIZE, SCALE, WIDTH, HEIGHT, MAZE_DATA
 from src.utils.enum import Direction
@@ -42,22 +43,25 @@ class Maze:
         for g in self.__ghosts: self.update_entity(g)
 
     def update_entity(self, entity):
-        # Xử lý khi pacman/ghost đi ra khỏi rìa map -> dịch chuyển
-        if entity.rect.right < 0:
-            entity.rect.left = self.get_width()
-        elif entity.rect.left > self.get_width():
-            entity.rect.right = 0
-
-        # cập nhật hướng di chuyển của pacman/ghost
-        old_position = entity.rect.topleft
-        if not self.__collision_manager.is_out_of_map(entity):
-            if self.__collision_manager.can_move(entity, entity.get_next_direction()):
-                    entity.change_direction()
-        
-        # Cập nhật vị trí của pacman/ghost
         entity.update()
-        if self.__collision_manager.is_collide_wall(entity):
-            entity.rect.topleft = old_position
+        for i in range(entity.get_speed()):
+            # Xử lý khi pacman/ghost đi ra khỏi rìa map -> dịch chuyển
+            if entity.rect.right < 0:
+                entity.rect.left = self.get_width()
+            elif entity.rect.left > self.get_width():
+                entity.rect.right = 0
+
+            # cập nhật hướng di chuyển của pacman/ghost
+            old_position = entity.rect.topleft
+            if not self.__collision_manager.is_out_of_map(entity):
+                if self.__collision_manager.can_move(entity, entity.get_next_direction()):
+                        entity.change_direction()
+
+            entity.update_position()
+            # Cập nhật vị trí của pacman/ghost
+            if self.__collision_manager.is_collide_wall(entity):
+                print(entity.rect.topleft, old_position)
+                entity.rect.topleft = old_position
 
         # Xử lý pacman ăn pellet
         if isinstance(entity, Pacman):
@@ -66,7 +70,7 @@ class Maze:
                 if pacman.collide(g):
                     # TODO: Xử lý khi pacman va chạm ghost
                     print("Pacman collide ghost")
-                    if g.is_frightened: print("Pacman eat ghost")
+                    if g.mode == ghost.Ghost.FRIGHTENED: print("Pacman eat ghost")
                     else: print("Pacman die")
 
             r, c = helper.pixel_to_grid(pacman.get_hitbox().center)
@@ -86,10 +90,8 @@ class Maze:
         print(self.__pacman.get_position())
         # Xử lý ghost
         if isinstance(entity, ghost.Ghost):
-            dest = self.__pacman.get_position()
-            # dest = (14, 14)
             if not self.__collision_manager.is_out_of_map(self.__pacman):
-                entity.execute_ai(dest)
+                entity.execute_ai(self)
 
     def add_entity(self, entity, position):
         if isinstance(entity, Pacman):
@@ -97,8 +99,12 @@ class Maze:
             self.__pacman = entity
         elif isinstance(entity, ghost.Ghost): self.__ghosts.append(entity)
         x, y = helper.grid_to_pixel(position)
-        entity.get_hitbox().center = (x, y)
-        entity.rect.center = (x, y)
+        x_center, y_center = x+helper.block_size_scaled/2, y+helper.block_size_scaled/2
+        entity.get_hitbox().center = (x_center, y_center)
+        entity.rect.center = (x_center, y_center)
+
+    def get_pacman_pos(self):
+        return self.__pacman.get_position()
 
     def get_entities(self):
         entities = [g for g in self.__ghosts]
@@ -133,13 +139,13 @@ class CollisionManager:
         result = True
         old_xy = (entity.rect.x, entity.rect.y)
         if direction == Direction.LEFT:
-            entity.rect.x -= entity.get_speed()
+            entity.rect.x -= Sprite.NORMAL_SPEED
         elif direction == Direction.RIGHT:
-            entity.rect.x += entity.get_speed()
+            entity.rect.x += Sprite.NORMAL_SPEED
         elif direction == Direction.UP:
-            entity.rect.y -= entity.get_speed()
+            entity.rect.y -= Sprite.NORMAL_SPEED
         elif direction == Direction.DOWN:
-            entity.rect.y += entity.get_speed()
+            entity.rect.y += Sprite.NORMAL_SPEED
 
         if self.is_collide_wall(entity): result = False
 
