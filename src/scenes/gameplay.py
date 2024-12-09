@@ -1,7 +1,7 @@
 import pygame
 
 import src.utils.debugger as debugger
-from src.entities.ghost import Ghost, GhostRed
+from src.entities.ghost import Ghost, GhostRed, RedAIStrategy
 from src.entities.maze import Maze, MazeRender
 from src.entities.pacman import Pacman
 from src.scenes.scene import Scene
@@ -18,7 +18,7 @@ class GamePlay(Scene):
         self.__ghost = GhostRed()
 
         self.__maze = Maze(game)
-        self.__maze.add_entity(self.__ghost, (14, 14))
+        self.__maze.add_entity(self.__ghost, RedAIStrategy.SPAWN_POS)
         self.__maze.add_entity(self.__pacman, (23, 14))
         self.__maze_render = MazeRender(self.__maze)
         self._game.game_status.start = pygame.time.get_ticks()

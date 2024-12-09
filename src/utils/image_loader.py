@@ -210,6 +210,16 @@ class ImageLoader:
         img = pygame.transform.scale_by(img, SCALE)
         return img
 
+    def ghost_dead(self, direction):
+        index = 0
+        if   direction == 'right': index = 0
+        elif direction == 'left': index = 1
+        elif direction == 'up': index = 2
+        elif direction == 'down': index = 3
+        img = self.general_sprites.subsurface(584+(16*index), 80, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
     # Text
     def text_image(self, text, color='white'):
         text = text.upper()

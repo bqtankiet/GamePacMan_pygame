@@ -10,13 +10,14 @@ class Animation:
         self.index = 0
         self.frame_tick = 0
         self.frame_rate = 5
-        if sprite_name.lower() == "pacman": self.sprites = self.SpriteSheets.pacman()
-        if sprite_name.lower() == "ghost_red": self.sprites = self.SpriteSheets.ghost('red')
-        if sprite_name.lower() == "ghost_pink": self.sprites = self.SpriteSheets.ghost('pink')
-        if sprite_name.lower() == "ghost_orange": self.sprites = self.SpriteSheets.ghost('orange')
-        if sprite_name.lower() == "ghost_cyan": self.sprites = self.SpriteSheets.ghost('cyan')
-        if sprite_name.lower() == "frightened": self.sprites = self.SpriteSheets.frightened()
-        if sprite_name.lower() == "frightened_flash": self.sprites = self.SpriteSheets.frightened_flash()
+        if   sprite_name.lower() == "pacman": self.sprites = self.SpriteSheets.pacman()
+        elif sprite_name.lower() == "ghost_red": self.sprites = self.SpriteSheets.ghost('red')
+        elif sprite_name.lower() == "ghost_pink": self.sprites = self.SpriteSheets.ghost('pink')
+        elif sprite_name.lower() == "ghost_orange": self.sprites = self.SpriteSheets.ghost('orange')
+        elif sprite_name.lower() == "ghost_cyan": self.sprites = self.SpriteSheets.ghost('cyan')
+        elif sprite_name.lower() == "frightened": self.sprites = self.SpriteSheets.frightened()
+        elif sprite_name.lower() == "frightened_flash": self.sprites = self.SpriteSheets.frightened_flash()
+        elif sprite_name.lower() == "ghost_dead": self.sprites = self.SpriteSheets.ghost_dead()
 
 
     def next(self):
@@ -80,4 +81,14 @@ class Animation:
                 Direction.RIGHT: tmp,
                 Direction.UP: tmp,
                 Direction.DOWN: tmp,
+            }
+
+        @staticmethod
+        def ghost_dead():
+            img = ImageLoader()
+            return {
+                Direction.LEFT: (img.ghost_dead('left'),img.ghost_dead('left')),
+                Direction.RIGHT: (img.ghost_dead('right'),img.ghost_dead('right')),
+                Direction.UP: (img.ghost_dead('up'),img.ghost_dead('up')),
+                Direction.DOWN: (img.ghost_dead('down'),img.ghost_dead('down')),
             }

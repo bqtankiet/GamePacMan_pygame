@@ -70,7 +70,9 @@ class Maze:
                 if pacman.collide(g):
                     # TODO: Xử lý khi pacman va chạm ghost
                     print("Pacman collide ghost")
-                    if g.mode == ghost.Ghost.FRIGHTENED: print("Pacman eat ghost")
+                    if g.mode == ghost.Ghost.FRIGHTENED:
+                        g.switch_mode(ghost.Ghost.DEAD, 99)
+                        print("Pacman eat ghost")
                     else: print("Pacman die")
 
             r, c = helper.pixel_to_grid(pacman.get_hitbox().center)
@@ -84,7 +86,7 @@ class Maze:
                     self.__grid[r][c] = 0
                     # TODO: Xử lý khi ăn hạt năng lượng lớn
                     self.game.game_status.increase_score(game.GameStatus.SCORE_POWER_PELLET)
-                    for g in self.__ghosts: g.frightened()
+                    for g in self.__ghosts: g.switch_mode(ghost.Ghost.FRIGHTENED, 5)
                     print("Eat Power pellet")
 
         print(self.__pacman.get_position())
