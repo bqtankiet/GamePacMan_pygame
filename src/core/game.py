@@ -70,10 +70,13 @@ class GameStatus:
         self.best_score = 0
         self.total_pause_duration = 0
         self.pause_start = None
+        self.lives = 3
+        self.level = 1
 
     def start_game(self):
         self.start = pygame.time.get_ticks()
         self.total_pause_duration = 0
+        self.score = 0
         self.pause_start = None
 
     def pause(self):

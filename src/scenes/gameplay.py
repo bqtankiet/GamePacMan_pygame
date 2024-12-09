@@ -91,3 +91,12 @@ class GamePlay(Scene):
         y = HEIGHT//2 - self.__maze.get_height()//2 - time_lbl.get_height()*2 - 10
         self._surface.blit(time_lbl, time_lbl.get_rect(center = (x, y)))
         self._surface.blit(time_val, time_val.get_rect(center = (x, y+time_lbl.get_height()+5)))
+
+        ### Level
+        level = self._game.game_status.level
+        level_lbl = ImageLoader().text_image("level")
+        level_val = ImageLoader().text_image(f"{level}")
+        x = WIDTH//2
+        y = HEIGHT//2 + self.__maze.get_height()//2 + highest_score_lbl.get_height() + 5
+        self._surface.blit(level_lbl, level_lbl.get_rect(center = (x, y)))
+        self._surface.blit(level_val, level_val.get_rect(center = (x, y+time_lbl.get_height()+5)))

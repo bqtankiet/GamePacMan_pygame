@@ -92,7 +92,7 @@ class BasicAIStrategy(ABC):
 
 class RedAIStrategy(BasicAIStrategy):
     SPAWN_POS = (14, 14)
-    SCATTER_POS = [(1,1), (6,1), (6,5)]
+    SCATTER_POS = [(1,1), (6,5)]
     SCATTER_DURATION = 10
     CHASE_DURATION = 20
     WAITING_DURATION = 3

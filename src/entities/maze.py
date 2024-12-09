@@ -72,6 +72,7 @@ class Maze:
                     print("Pacman collide ghost")
                     if g.mode == ghost.Ghost.FRIGHTENED:
                         g.switch_mode(ghost.Ghost.DEAD, 99)
+                        self.game.game_status.increase_score(game.GameStatus.SCORE_PELLET)
                         print("Pacman eat ghost")
                     else: print("Pacman die")
 
