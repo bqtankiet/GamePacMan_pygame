@@ -12,6 +12,6 @@ def pixel_to_grid(position):
 
 def grid_to_pixel(position):
     """Chuyển đổi vị trí ô trong lưới sang vị trí pixel"""
-    x = (position[1] * block_size_scaled) + (block_size_scaled / 2)
-    y = (position[0] * block_size_scaled) + (block_size_scaled / 2)
+    x = (position[1] * block_size_scaled)
+    y = (position[0] * block_size_scaled)
     return x, y

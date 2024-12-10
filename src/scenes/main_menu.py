@@ -12,7 +12,7 @@ class MainMenu(Scene):
     def __init__(self, game):
         super().__init__(game)
         self.__background = ImageLoader().background_main_menu()
-        self.__button_start = TextButton("Start Game", action=lambda: self._game.switch_scene("GamePlay"))
+        self.__button_start = TextButton("Start Game", action=lambda: self.new_game())
         self.__button_exit = TextButton("Exit", action=lambda: self._game.exit())
         self.__button_group = ButtonGroup([self.__button_start, self.__button_exit])
 
@@ -49,3 +49,7 @@ class MainMenu(Scene):
 
     def reset(self):
         self.__button_group.reset()
+
+    def new_game(self):
+        self._game.new_game()
+        self._game.switch_scene("GamePlay")

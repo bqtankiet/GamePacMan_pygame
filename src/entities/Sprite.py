@@ -1,11 +1,12 @@
 import pygame.sprite
-from pygame.examples.cursors import image
 
 from src.entities.animation import Animation
+from src.utils.constant import MAZE_DATA, BLOCK_SIZE, SCALE
 from src.utils.enum import Direction
 
 
 class Sprite(pygame.sprite.Sprite):
+    NORMAL_SPEED = 1
     def __init__(self, animation: Animation, hitbox):
         super().__init__()
         self._animation = animation
@@ -20,17 +21,21 @@ class Sprite(pygame.sprite.Sprite):
     def update_position(self):
         match self._direction:
             case Direction.RIGHT:
-                self.rect.x += self._speed
+                self.rect.x += Sprite.NORMAL_SPEED
             case Direction.LEFT:
-                self.rect.x -= self._speed
+                self.rect.x -= Sprite.NORMAL_SPEED
             case Direction.UP:
-                self.rect.y -= self._speed
+                self.rect.y -= Sprite.NORMAL_SPEED
             case Direction.DOWN:
-                self.rect.y += self._speed
+                self.rect.y += Sprite.NORMAL_SPEED
 
     def get_hitbox(self):
         self._hitbox.center = self.rect.center
         return self._hitbox
+
+    def get_position(self):
+        return (int(self.rect.center[0] / (BLOCK_SIZE*SCALE)),
+                int(self.rect.center[1] / (BLOCK_SIZE*SCALE)))
 
     def collide(self, sprite):
         """Phương thức kiểm tra va chạm giữa 2 sprite

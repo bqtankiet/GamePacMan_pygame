@@ -1,71 +1,124 @@
+import copy
+
 import pygame
 
 import src.entities.ghost as ghost
+import src.core.game as game
+from src.entities.Sprite import Sprite
 from src.entities.pacman import Pacman
 from src.utils.constant import BLOCK_SIZE, SCALE, WIDTH, HEIGHT, MAZE_DATA
 from src.utils.enum import Direction
 from src.utils.image_loader import ImageLoader
 import src.utils.helper as helper
+import src.utils.debugger as debugger
 
 
 class Maze:
     WALL = 1
     PELLET = 2
     POWER_PELLET = 3
+    READY = 0
+    PLAYING = 1
+    EAT_GHOST = 2
 
-    def __init__(self):
-        self.__grid = MAZE_DATA
-        self.__entities = []
+    def __init__(self, game):
+        self.__grid = copy.deepcopy(MAZE_DATA)
+        # self.__entities = []
         self.__collision_manager = CollisionManager(self.__grid)
+        self.__pacman = None
+        self.__ghosts = []
+        self.__start_time = pygame.time.get_ticks()
+        self.__state = Maze.READY
+        self.game = game
+        self.maze_render = None
 
     def update(self):
-        for entity in self.__entities:
-            self.update_entity(entity)
+        current_time = pygame.time.get_ticks()
+        if self.__state == Maze.READY:
+            if (current_time - self.__start_time)/1000 > 3:
+                self.set_state(Maze.PLAYING)
+            return
+        if self.__state == Maze.EAT_GHOST:
+            if (current_time - self.__start_time)/1000 > 1:
+                self.set_state(Maze.PLAYING)
+            return
+        # update pacman
+        self.update_entity(self.__pacman)
+        # update ghosts
+        for g in self.__ghosts: self.update_entity(g)
 
     def update_entity(self, entity):
-        # Xử lý khi pacman/ghost đi ra khỏi rìa map -> dịch chuyển
-        if entity.rect.right < 0:
-            entity.rect.left = self.get_width()
-        elif entity.rect.left > self.get_width():
-            entity.rect.right = 0
-
-        # cập nhật hướng di chuyển của pacman/ghost
-        old_position = entity.rect.topleft
-        if not self.__collision_manager.is_out_of_map(entity):
-            if self.__collision_manager.can_move(entity, entity.get_next_direction()):
-                    entity.change_direction()
-        
-        # Cập nhật vị trí của pacman/ghost
         entity.update()
-        if self.__collision_manager.is_collide_wall(entity):
-            entity.rect.topleft = old_position
+        for i in range(entity.get_speed()):
+            # Xử lý khi pacman/ghost đi ra khỏi rìa map -> dịch chuyển
+            if entity.rect.right < 0:
+                entity.rect.left = self.get_width()
+            elif entity.rect.left > self.get_width():
+                entity.rect.right = 0
+
+            # cập nhật hướng di chuyển của pacman/ghost
+            old_position = entity.rect.topleft
+            if not self.__collision_manager.is_out_of_map(entity):
+                if self.__collision_manager.can_move(entity, entity.get_next_direction()):
+                        entity.change_direction()
+
+            entity.update_position()
+            # Cập nhật vị trí của pacman/ghost
+            if self.__collision_manager.is_collide_wall(entity):
+                print(entity.rect.topleft, old_position)
+                entity.rect.topleft = old_position
 
         # Xử lý pacman ăn pellet
         if isinstance(entity, Pacman):
-            r, c = helper.pixel_to_grid(entity.get_hitbox().center)
-            if not self.__collision_manager.is_out_of_map(entity):
+            pacman = entity
+            for g in self.__ghosts:
+                if pacman.collide(g):
+                    # TODO: Xử lý khi pacman va chạm ghost
+                    print("Pacman collide ghost")
+                    if g.mode == ghost.Ghost.FRIGHTENED:
+                        self.set_state(Maze.EAT_GHOST)
+                        g.switch_mode(ghost.Ghost.DEAD, 99)
+                        self.game.game_status.increase_score(game.GameStatus.SCORE_GHOST)
+                        print("Pacman eat ghost")
+                    else: print("Pacman die")
+
+            r, c = helper.pixel_to_grid(pacman.get_hitbox().center)
+            if not self.__collision_manager.is_out_of_map(pacman):
                 value = self.__grid[r][c]
                 if value == self.PELLET:
+                    # TODO: Xử lý khi ăn hạt thường
                     self.__grid[r][c] = 0
+                    self.game.game_status.increase_score(game.GameStatus.SCORE_PELLET)
                 if value == self.POWER_PELLET:
                     self.__grid[r][c] = 0
                     # TODO: Xử lý khi ăn hạt năng lượng lớn
+                    self.game.game_status.increase_score(game.GameStatus.SCORE_POWER_PELLET)
+                    for g in self.__ghosts: g.switch_mode(ghost.Ghost.FRIGHTENED, 5)
                     print("Eat Power pellet")
 
+        print(self.__pacman.get_position())
         # Xử lý ghost
         if isinstance(entity, ghost.Ghost):
-            entity.execute_ai(self.__collision_manager)
+            if not self.__collision_manager.is_out_of_map(self.__pacman):
+                entity.execute_ai(self)
 
-
-    def add_entity(self, pacman, position):
-        """Thêm Pacman vào Mê cung"""
-        self.__entities.append(pacman)
+    def add_entity(self, entity, position):
+        if isinstance(entity, Pacman):
+            debugger.set_attributes('hitbox', entity)
+            self.__pacman = entity
+        elif isinstance(entity, ghost.Ghost): self.__ghosts.append(entity)
         x, y = helper.grid_to_pixel(position)
-        pacman.get_hitbox().center = (x, y)
-        pacman.rect.center = (x, y)
+        x_center, y_center = x+helper.block_size_scaled/2, y+helper.block_size_scaled/2
+        entity.get_hitbox().center = (x_center, y_center)
+        entity.rect.center = (x_center, y_center)
+
+    def get_pacman_pos(self):
+        return self.__pacman.get_position()
 
     def get_entities(self):
-        return self.__entities
+        entities = [g for g in self.__ghosts]
+        entities.append(self.__pacman)
+        return entities
 
     def get_grid(self):
         return self.__grid
@@ -75,6 +128,16 @@ class Maze:
 
     def get_height(self):
         return len(self.__grid) * BLOCK_SIZE * SCALE
+
+    def get_state(self):
+        return self.__state
+
+    def set_state(self, state):
+        self.__state = state
+        self.__start_time = pygame.time.get_ticks()
+
+    def set_maze_render(self, maze_render):
+        self.maze_render = maze_render
 
 class CollisionManager:
     """Class phụ trách việc kiểm tra và xử lý chạm"""
@@ -87,13 +150,13 @@ class CollisionManager:
         result = True
         old_xy = (entity.rect.x, entity.rect.y)
         if direction == Direction.LEFT:
-            entity.rect.x -= entity.get_speed()
+            entity.rect.x -= Sprite.NORMAL_SPEED
         elif direction == Direction.RIGHT:
-            entity.rect.x += entity.get_speed()
+            entity.rect.x += Sprite.NORMAL_SPEED
         elif direction == Direction.UP:
-            entity.rect.y -= entity.get_speed()
+            entity.rect.y -= Sprite.NORMAL_SPEED
         elif direction == Direction.DOWN:
-            entity.rect.y += entity.get_speed()
+            entity.rect.y += Sprite.NORMAL_SPEED
 
         if self.is_collide_wall(entity): result = False
 
@@ -129,11 +192,32 @@ class MazeRender:
         self.__entities = pygame.sprite.Group(maze.get_entities())
         self.__area = self.__image.get_rect(center=(WIDTH / 2, HEIGHT / 2))
         self.__maze = maze
+        self.__maze.set_maze_render(self)
 
     def render(self):
         self.draw_maze()
         self.draw_entities()
+        debugger.render(self.__maze_surface)
+
+        if self.__maze.get_state() == Maze.READY:
+            self.draw_ready_message()
+        if self.__maze.get_state() == Maze.EAT_GHOST:
+            self.draw_score(game.GameStatus.SCORE_GHOST)
         return self.__maze_surface
+
+    def draw_ready_message(self):
+        message = ImageLoader().text_image("ready!")
+        x = self.__maze.get_width()//2
+        y = self.__maze.get_height()//2 + message.get_height()*2
+        self.__maze_surface.blit(message, message.get_rect(center=(x, y)))
+
+    def draw_score(self, score):
+        score_img = ImageLoader().score_100()
+        if score == 200: score_img = ImageLoader().score_200()
+        x, y = self.__maze.get_pacman_pos()
+        x = x * BLOCK_SIZE*SCALE + BLOCK_SIZE*SCALE//2
+        y = y * BLOCK_SIZE*SCALE - score_img.get_height()//2
+        self.__maze_surface.blit(score_img, score_img.get_rect(center=(x, y)))
 
     def draw_entities(self):
         self.__entities.draw(self.__maze_surface)

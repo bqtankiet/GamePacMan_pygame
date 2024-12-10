@@ -192,6 +192,34 @@ class ImageLoader:
         img = pygame.transform.scale_by(img, SCALE)
         return img
 
+    def frightened_1(self, color = 'normal'):
+        img = None
+        if color == 'normal' or color is None:
+            img = self.general_sprites.subsurface(584, 64, 16, 16)
+        elif color == 'white':
+            img = self.general_sprites.subsurface(616, 64, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def frightened_2(self, color = 'normal'):
+        img = None
+        if color == 'normal' or color is None:
+            img = self.general_sprites.subsurface(600, 64, 16, 16)
+        elif color == 'white':
+            img = self.general_sprites.subsurface(632, 64, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
+    def ghost_dead(self, direction):
+        index = 0
+        if   direction == 'right': index = 0
+        elif direction == 'left': index = 1
+        elif direction == 'up': index = 2
+        elif direction == 'down': index = 3
+        img = self.general_sprites.subsurface(584+(16*index), 80, 16, 16)
+        img = pygame.transform.scale_by(img, SCALE)
+        return img
+
     # Text
     def text_image(self, text, color='white'):
         text = text.upper()
@@ -205,6 +233,8 @@ class ImageLoader:
                 pos = {'line': 2, 'index': ord(char) - ord('0')}
             elif char in "'":
                 pos = {'line': 2, 'index': 12}
+            elif char in "!":
+                pos = {'line': 1, 'index': 11}
             else:
                 continue  # Nếu không phải 'chữ' hoặc 'số' thì duyệt qua kí tự tiếp theo
 
