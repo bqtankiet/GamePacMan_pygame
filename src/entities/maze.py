@@ -19,6 +19,7 @@ class Maze:
     POWER_PELLET = 3
     READY = 0
     PLAYING = 1
+    EAT_GHOST = 2
 
     def __init__(self, game):
         self.__grid = copy.deepcopy(MAZE_DATA)
@@ -29,14 +30,18 @@ class Maze:
         self.__start_time = pygame.time.get_ticks()
         self.__state = Maze.READY
         self.game = game
+        self.maze_render = None
 
     def update(self):
         current_time = pygame.time.get_ticks()
         if self.__state == Maze.READY:
-            if current_time - self.__start_time > 3000:
-                self.__state = Maze.PLAYING
+            if (current_time - self.__start_time)/1000 > 3:
+                self.set_state(Maze.PLAYING)
             return
-
+        if self.__state == Maze.EAT_GHOST:
+            if (current_time - self.__start_time)/1000 > 1:
+                self.set_state(Maze.PLAYING)
+            return
         # update pacman
         self.update_entity(self.__pacman)
         # update ghosts
@@ -71,8 +76,9 @@ class Maze:
                     # TODO: Xử lý khi pacman va chạm ghost
                     print("Pacman collide ghost")
                     if g.mode == ghost.Ghost.FRIGHTENED:
+                        self.set_state(Maze.EAT_GHOST)
                         g.switch_mode(ghost.Ghost.DEAD, 99)
-                        self.game.game_status.increase_score(game.GameStatus.SCORE_PELLET)
+                        self.game.game_status.increase_score(game.GameStatus.SCORE_GHOST)
                         print("Pacman eat ghost")
                     else: print("Pacman die")
 
@@ -128,8 +134,10 @@ class Maze:
 
     def set_state(self, state):
         self.__state = state
-        if state == Maze.READY:
-            self.__start_time = pygame.time.get_ticks()
+        self.__start_time = pygame.time.get_ticks()
+
+    def set_maze_render(self, maze_render):
+        self.maze_render = maze_render
 
 class CollisionManager:
     """Class phụ trách việc kiểm tra và xử lý chạm"""
@@ -184,6 +192,7 @@ class MazeRender:
         self.__entities = pygame.sprite.Group(maze.get_entities())
         self.__area = self.__image.get_rect(center=(WIDTH / 2, HEIGHT / 2))
         self.__maze = maze
+        self.__maze.set_maze_render(self)
 
     def render(self):
         self.draw_maze()
@@ -192,7 +201,8 @@ class MazeRender:
 
         if self.__maze.get_state() == Maze.READY:
             self.draw_ready_message()
-
+        if self.__maze.get_state() == Maze.EAT_GHOST:
+            self.draw_score(game.GameStatus.SCORE_GHOST)
         return self.__maze_surface
 
     def draw_ready_message(self):
@@ -200,6 +210,14 @@ class MazeRender:
         x = self.__maze.get_width()//2
         y = self.__maze.get_height()//2 + message.get_height()*2
         self.__maze_surface.blit(message, message.get_rect(center=(x, y)))
+
+    def draw_score(self, score):
+        score_img = ImageLoader().score_100()
+        if score == 200: score_img = ImageLoader().score_200()
+        x, y = self.__maze.get_pacman_pos()
+        x = x * BLOCK_SIZE*SCALE + BLOCK_SIZE*SCALE//2
+        y = y * BLOCK_SIZE*SCALE - score_img.get_height()//2
+        self.__maze_surface.blit(score_img, score_img.get_rect(center=(x, y)))
 
     def draw_entities(self):
         self.__entities.draw(self.__maze_surface)
