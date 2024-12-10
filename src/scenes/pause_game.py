@@ -34,6 +34,8 @@ class PauseGame(Scene):
     # Các methods override của lớp cha (Scene)
     #-----------------------------------------
     def render_surface(self):
+        self._surface.fill((0, 0, 0))
+
         # render title
         title_rect = self.__title.get_rect(center=(WIDTH / 2, HEIGHT / 2 - 100 * SCALE))
         self._surface.blit(self.__title, title_rect)
