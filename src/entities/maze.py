@@ -1,6 +1,5 @@
 import copy
 import pygame
-from typing import List, Optional
 
 import src.entities.ghost as ghost
 import src.core.game as game
