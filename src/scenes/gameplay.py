@@ -8,18 +8,16 @@ from src.scenes.scene import Scene
 from src.utils.constant import WIDTH, HEIGHT
 from src.utils.enum import Direction
 from src.utils.image_loader import ImageLoader
+import src.core.game as g
 
 class GamePlay(Scene):
     """Màn hình Gameplay"""
 
-    def __init__(self, game):
-        super().__init__(game)
-        self.__pacman = Pacman()
-        self.__ghost = GhostRed()
+    def __init__(self):
+        super().__init__()
+        self._game = g.Game.get_instance()
 
-        self.__maze = Maze(game)
-        self.__maze.add_entity(self.__ghost, RedAIStrategy.SPAWN_POS)
-        self.__maze.add_entity(self.__pacman, (23, 14))
+        self.__maze = Maze(self._game)
         self.__maze_render = MazeRender(self.__maze)
         self._game.game_status.start_game()
     #-----------------------------------------
@@ -35,14 +33,15 @@ class GamePlay(Scene):
     def handle_event(self, event):
         if event.type != pygame.KEYDOWN: return
 
+        pacman = self.__maze.pacman
         if event.key == pygame.K_LEFT:
-            self.__pacman.set_next_direction(Direction.LEFT)
+            pacman.set_next_direction(Direction.LEFT)
         elif event.key == pygame.K_RIGHT:
-            self.__pacman.set_next_direction(Direction.RIGHT)
+            pacman.set_next_direction(Direction.RIGHT)
         elif event.key == pygame.K_UP:
-            self.__pacman.set_next_direction(Direction.UP)
+            pacman.set_next_direction(Direction.UP)
         elif event.key == pygame.K_DOWN:
-            self.__pacman.set_next_direction(Direction.DOWN)
+            pacman.set_next_direction(Direction.DOWN)
         elif event.key == pygame.K_ESCAPE:
             self._game.game_status.pause()
             self._game.switch_scene("PauseGame")
@@ -54,9 +53,15 @@ class GamePlay(Scene):
 
     def update(self):
         self.__maze.update()
-        self.render_surface()
 
     def reset(self):
+        self._game = g.Game.get_instance()
+        self.__maze = Maze(self._game)
+        self.__maze_render = MazeRender(self.__maze)
+        self._game.game_status.start_game()
+
+
+    def on_enter(self):
         self.__maze.set_state(Maze.READY)
         self._game.game_status.resume()
 
@@ -65,38 +70,53 @@ class GamePlay(Scene):
     #----------------------------------------
 
     def render_status(self):
-        ### Score
+        self.render_score()
+        self.render_highest_score()
+        self.render_time()
+        self.render_level()
+        self.render_lives()
+
+    def render_score(self):
         score = self._game.game_status.current_score()
         score_lbl = ImageLoader().text_image("score")
         score_val = ImageLoader().text_image(f"{score}")
-        x = WIDTH//2 - self.__maze.get_width()//2 + score_lbl.get_width()//2
-        y = HEIGHT//2 - self.__maze.get_height()//2 - score_lbl.get_height()*2 - 10
-        self._surface.blit(score_lbl, score_lbl.get_rect(center = (x, y)))
-        self._surface.blit(score_val, score_val.get_rect(center = (x, y+score_lbl.get_height()+5)))
+        x = WIDTH // 2 - self.__maze.get_width() // 2 + score_lbl.get_width() // 2
+        y = HEIGHT // 2 - self.__maze.get_height() // 2 - score_lbl.get_height() * 2 - 10
+        self._surface.blit(score_lbl, score_lbl.get_rect(center=(x, y)))
+        self._surface.blit(score_val, score_val.get_rect(center=(x, y + score_lbl.get_height() + 5)))
 
-        ### Highest Score
+    def render_highest_score(self):
         highest_score = self._game.game_status.highest_score()
         highest_score_lbl = ImageLoader().text_image("Best Score")
         highest_score_val = ImageLoader().text_image(f"{highest_score}")
-        x = WIDTH//2
-        y = HEIGHT//2 - self.__maze.get_height()//2 - highest_score_lbl.get_height()*2 - 10
-        self._surface.blit(highest_score_lbl, highest_score_lbl.get_rect(center = (x, y)))
-        self._surface.blit(highest_score_val, highest_score_val.get_rect(center = (x, y+highest_score_lbl.get_height()+5)))
+        x = WIDTH // 2
+        y = HEIGHT // 2 - self.__maze.get_height() // 2 - highest_score_lbl.get_height() * 2 - 10
+        self._surface.blit(highest_score_lbl, highest_score_lbl.get_rect(center=(x, y)))
+        self._surface.blit(highest_score_val, highest_score_val.get_rect(center=(x, y + highest_score_lbl.get_height() + 5)))
 
-        ### Time
+    def render_time(self):
         current_time = self._game.game_status.current_time()
         time_lbl = ImageLoader().text_image("time")
         time_val = ImageLoader().text_image(f"{current_time[0]}'{current_time[1]:02}")
-        x = WIDTH//2 + self.__maze.get_width()//2 - time_lbl.get_width()//2
-        y = HEIGHT//2 - self.__maze.get_height()//2 - time_lbl.get_height()*2 - 10
-        self._surface.blit(time_lbl, time_lbl.get_rect(center = (x, y)))
-        self._surface.blit(time_val, time_val.get_rect(center = (x, y+time_lbl.get_height()+5)))
+        x = WIDTH // 2 + self.__maze.get_width() // 2 - time_lbl.get_width() // 2
+        y = HEIGHT // 2 - self.__maze.get_height() // 2 - time_lbl.get_height() * 2 - 10
+        self._surface.blit(time_lbl, time_lbl.get_rect(center=(x, y)))
+        self._surface.blit(time_val, time_val.get_rect(center=(x, y + time_lbl.get_height() + 5)))
 
-        ### Level
+    def render_level(self):
         level = self._game.game_status.level
         level_lbl = ImageLoader().text_image("level")
         level_val = ImageLoader().text_image(f"{level}")
-        x = WIDTH//2
-        y = HEIGHT//2 + self.__maze.get_height()//2 + highest_score_lbl.get_height() + 5
-        self._surface.blit(level_lbl, level_lbl.get_rect(center = (x, y)))
-        self._surface.blit(level_val, level_val.get_rect(center = (x, y+time_lbl.get_height()+5)))
+        x = WIDTH // 2
+        y = HEIGHT // 2 + self.__maze.get_height() // 2 + level_lbl.get_height() + 5
+        self._surface.blit(level_lbl, level_lbl.get_rect(center=(x, y)))
+        self._surface.blit(level_val, level_val.get_rect(center=(x, y + level_lbl.get_height() + 5)))
+
+    def render_lives(self):
+        lives = self._game.game_status.lives
+        live_img = ImageLoader().pacman_live()
+        for i in range(lives):
+            x = WIDTH // 2 - self.__maze.get_width() // 2
+            y = HEIGHT // 2 + self.__maze.get_height() // 2 + 5
+            pos = (x+live_img.get_width()*i, y)
+            self._surface.blit(live_img, live_img.get_rect(topleft=pos))

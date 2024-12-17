@@ -14,7 +14,8 @@ class Sprite(pygame.sprite.Sprite):
         self._speed = 2
         self._direction = Direction.DOWN
         self._next_direction = self._direction
-        
+
+        # pygame.Sprite fields
         self.image = animation.current()
         self.rect = self.image.get_rect()
 

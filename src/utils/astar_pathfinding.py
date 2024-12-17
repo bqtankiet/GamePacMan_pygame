@@ -16,7 +16,6 @@ class AStarPathfinding:
         while not pq.is_empty():
             current_node = pq.pop()
             explored.add(current_node.position)
-            print(current_node.position)
             if current_node.hCost == 0: return self.build_path(current_node)
             for n in current_node.get_neighbors():
                 if n.position in explored: continue

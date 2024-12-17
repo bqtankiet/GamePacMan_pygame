@@ -170,6 +170,8 @@ class ImageLoader:
         img = pygame.transform.scale_by(img, SCALE)
         return img
 
+
+
     # Ghost
     def ghost(self, color, direction):
         y_index = -1
@@ -209,6 +211,13 @@ class ImageLoader:
             img = self.general_sprites.subsurface(632, 64, 16, 16)
         img = pygame.transform.scale_by(img, SCALE)
         return img
+
+    def pacman_dead(self, index):
+        if 0 <= index <= 11:
+            img = self.general_sprites.subsurface(488+(16*index), 0, 16, 16)
+            img = pygame.transform.scale_by(img, SCALE)
+            return img
+        return None
 
     def ghost_dead(self, direction):
         index = 0
