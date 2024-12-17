@@ -14,5 +14,8 @@ class Pacman(Sprite):
 
     def update(self):
         """Cập nhật vị trí và animation của Pacman sau mỗi frame"""
-        self.update_position()
+        # self.update_position()
         self._animation.update()
+
+    def die(self):
+        self._animation = Animation(self, 'pacman_dead', frame_rate = 8)

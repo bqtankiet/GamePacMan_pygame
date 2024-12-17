@@ -3,13 +3,15 @@ from src.scenes.scene import Scene
 from src.utils.constant import WIDTH, HEIGHT, SCALE
 from src.utils.image_loader import ImageLoader
 from src.scenes.component import TextButton, ButtonGroup
+import src.core.game as g
 
 
 class GameOver(Scene):
     """Màn hình Game Over"""
 
-    def __init__(self, game):
-        super().__init__(game)
+    def __init__(self):
+        super().__init__()
+        self._game = g.Game.get_instance()
         # Định nghĩa các label
         self.__title = pygame.transform.scale_by(ImageLoader().text_image("Game Over", "red"), 2)
         self.__score_label = ImageLoader().text_image("Score", "cyan")
@@ -17,7 +19,7 @@ class GameOver(Scene):
         self.__time_label = ImageLoader().text_image("Time", "cyan")
 
         # Định nghĩa hành động cho các nút
-        self.__button_play_again = TextButton("Play Again", action=lambda: self._game.switch_scene("GamePlay"))
+        self.__button_play_again = TextButton("Play Again", action=lambda: self._game.switch_scene("GamePlay", reset = True))
         self.__button_main_menu = TextButton("Main Menu", action=lambda: self._game.switch_scene("MainMenu"))
 
         # ButtonGroup để quản lý các nút
@@ -70,7 +72,18 @@ class GameOver(Scene):
 
     def update(self):
         self.__button_group.update() # Cập nhật lại trạng thái các button
-        self.render_surface() # Cập nhật lại giao diện
 
-    def reset(self):
+    def reset(self): pass
+
+    def on_enter(self):
         self.__button_group.reset()
+
+        # render status: score, highest_score, time
+        current_time = self._game.game_status.current_time()
+        score = self._game.game_status.current_score()
+        highest_score = self._game.game_status.highest_score()
+        self.__score = ImageLoader().text_image(f'{score}')
+        self.__highest_score = ImageLoader().text_image(f'{highest_score}')
+        self.__time = ImageLoader().text_image(f"{current_time[0]}'{current_time[1]:02}")
+
+

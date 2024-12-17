@@ -3,19 +3,26 @@ from abc import ABC, abstractmethod
 import pygame
 
 from src.utils.constant import HEIGHT, WIDTH
+import src.core.game as g
 
 
 class Scene(ABC):
     """Abstract class dùng để tạo ra các màn hình của Game"""
 
-    def __init__(self, game):
-        self._game = game
+    def __init__(self):
         self._surface = pygame.Surface((WIDTH, HEIGHT))
         self._surface.fill("BLACK")
 
     def render(self):
         """Phương thức dùng để hiện thị màn hình hiện tại lên mành hình chính"""
-        self._game.screen.blit(self._surface, (0, 0))
+        self.render_surface()
+        g.Game.get_instance().screen.blit(self._surface, (0, 0))
+
+    @abstractmethod
+    def on_enter(self): pass
+
+    # @abstractmethod
+    # def on_exit(self): pass
 
     @abstractmethod
     def render_surface(self):
