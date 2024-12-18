@@ -90,7 +90,13 @@ class GhostCyan(Ghost):
 
 # TODO: Tương tự GhostPink - thay đổi phương thức name "ghost_pink", thay đổi chiến thuật AI "PinkAIStrategy"
 class GhostPink(Ghost):
-    pass
+    def __init__(self):
+        animation = Animation(self, 'ghost_pink')  # Animation mặc định
+        hitbox = pygame.Rect(0, 0, BLOCK_SIZE * SCALE, BLOCK_SIZE * SCALE)  # Kích thước hitbox
+        super().__init__(animation, hitbox, PinkAIStrategy())
+
+    def name(self):
+        return 'ghost_pink'
 
 
 ### AI class
@@ -124,7 +130,7 @@ class BasicAIStrategy(ABC):
             center_y = int(r * BLOCK_SIZE * SCALE + (BLOCK_SIZE * SCALE) // 2)
 
             # debugger.set_attributes('path', path)
-            debugger.set_attributes('path_orange', path)
+            debugger.set_attributes('path_pink', path)
             next = path[0].position  # Lấy bước tiếp theo
             dx = next[0] - ghost.get_position()[0]
             dy = next[1] - ghost.get_position()[1]
@@ -212,7 +218,6 @@ class OrangeAIStrategy(BasicAIStrategy):
     WAITING_DURATION = 5
     STUCK_THRESHOLD = 2000  # Time threshold (in milliseconds) to check if Clyde is stuck at a corner
 
-
     def __init__(self):
         # Khởi tạo đúng các thuộc tính của lớp cha
         super().__init__()  # Gọi __init__ của lớp BasicAIStrategy
@@ -221,6 +226,7 @@ class OrangeAIStrategy(BasicAIStrategy):
 
     def execute(self, ghost, maze):
         """Thực thi thuật toán AI của Clyde"""
+        global dest
         self.auto_switch_mode(ghost)
 
         pacman_pos = maze.get_pacman_pos()
@@ -288,10 +294,84 @@ class OrangeAIStrategy(BasicAIStrategy):
 
 # TODO: Có thể tương tự RedAIStrategy - thay đổi các chiến lược như: thời gian, vị trí di chuyển ...
 class PinkAIStrategy(BasicAIStrategy):
+    SPAWN_ROW_COL = (13, 14)
+    SPAWN_POS = (SPAWN_ROW_COL[1], SPAWN_ROW_COL[0])  # x, y
+    SCATTER_POS = (1, 29)
+    SCATTER_DURATION = 5
+    CHASE_DURATION = 20
+    WAITING_DURATION = 5
 
     def execute(self, ghost, maze):
-        """ Hàm kế thừa từ lớp BasicAIStrategy để thực thi thuật toán"""
-        pass
+        """
+        Thực hiện thuật toán AI cho Ghost Pink.
+        Mục tiêu: Theo đuổi một vị trí cách Pacman 3 ô theo hướng di chuyển hiện tại của Pacman.
+        """
+        self.auto_switch_mode(ghost)
+
+        pacman_pos = maze.get_pacman_pos()
+        pacman_dir = maze.get_pacman_direction()
+        ghost_pos = ghost.get_position()
+
+        if ghost.mode == Ghost.CHASE:
+            target_pos = self.calculate_target_position(pacman_pos, pacman_dir)
+            ghost._speed = 2
+        elif ghost.mode == Ghost.FRIGHTENED:
+            target_pos = self.SPAWN_POS
+            ghost._speed = 1
+        elif ghost.mode == Ghost.SCATTER:
+            target_pos = self.SCATTER_POS
+            ghost._speed = 2
+        elif ghost.mode == Ghost.DEAD:
+            target_pos = self.SPAWN_POS
+            ghost._speed = 5
+        else:
+            target_pos = self.SPAWN_POS
+            ghost._speed = 1
+
+        self.move_to(ghost, target_pos)
+
+    def auto_switch_mode(self, ghost):
+        """
+        Tự động chuyển đổi giữa các chế độ hoạt động.
+        """
+        if ghost.mode == Ghost.FRIGHTENED:
+            return
+        if ghost.mode == Ghost.DEAD and ghost.get_position() == self.SPAWN_POS:
+            ghost.mode_duration = 0
+            ghost.mode = None
+            return
+
+        if ghost.last_time_switch_mode == 0:
+            ghost.last_time_switch_mode = pygame.time.get_ticks()
+
+        delta_time = (pygame.time.get_ticks() - ghost.last_time_switch_mode) // 1000
+
+        if ghost.mode is None and delta_time > self.WAITING_DURATION:
+            ghost.switch_mode(Ghost.CHASE, self.CHASE_DURATION)
+        elif delta_time > self.CHASE_DURATION and ghost.mode != Ghost.SCATTER:
+            ghost.switch_mode(Ghost.SCATTER, self.SCATTER_DURATION)
+        elif delta_time > self.SCATTER_DURATION and ghost.mode != Ghost.CHASE:
+            ghost.switch_mode(Ghost.CHASE, self.CHASE_DURATION)
+
+    def calculate_target_position(self, pacman_pos, pacman_dir):
+        """
+        Tính toán vị trí mục tiêu cách Pacman 3 ô theo hướng di chuyển hiện tại.
+
+        :param pacman_pos: Vị trí hiện tại của Pacman (x, y).
+        :param pacman_dir: Hướng di chuyển hiện tại của Pacman (Direction).
+        :return: Vị trí mục tiêu (x, y).
+        """
+        x, y = pacman_pos
+        if pacman_dir == Direction.UP:
+            return x, y - 3
+        elif pacman_dir == Direction.DOWN:
+            return x, y + 3
+        elif pacman_dir == Direction.LEFT:
+            return x - 3, y
+        elif pacman_dir == Direction.RIGHT:
+            return x + 3, y
+        else:
+            return x, y  # Nếu không có hướng nào, giữ nguyên vị trí Pacman
 
 
 # TODO: Có thể tương tự RedAIStrategy - thay đổi các chiến lược như: thời gian, vị trí di chuyển ...

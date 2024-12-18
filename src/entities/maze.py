@@ -11,6 +11,7 @@ from src.utils.image_loader import ImageLoader
 import src.utils.helper as helper
 import src.utils.debugger as debugger
 
+
 class Maze:
     WALL = 1
     PELLET = 2
@@ -22,7 +23,7 @@ class Maze:
     PACMAN_DIE = 3
 
     READY_TIME = 3000  # milliseconds
-    DELAY_1S_TIME = 1000 # miliseconds
+    DELAY_1S_TIME = 1000  # miliseconds
 
     def __init__(self, game):
         self.pacman = None
@@ -35,6 +36,12 @@ class Maze:
         self.game = game
         self.maze_render = None
 
+    def get_pacman_direction(self):
+        """Trả về hướng đi hiện tại của Pacman."""
+        if self.pacman:
+            return self.pacman.get_direction()
+        return None  # Trường hợp Pacman chưa được khởi tạo
+
     def update(self):
         current_time = pygame.time.get_ticks()
         if self.__state == Maze.PLAYING:
@@ -44,30 +51,34 @@ class Maze:
         elif self.__state == Maze.READY:
             if self.__is_time_elapsed(current_time, Maze.READY_TIME):
                 self.set_state(Maze.PLAYING)
-            else: return
+            else:
+                return
 
         elif self.__state == Maze.EAT_GHOST:
             if self.__is_time_elapsed(current_time, Maze.DELAY_1S_TIME):
                 self.set_state(Maze.PLAYING)
-            else: return
+            else:
+                return
 
         elif self.__state == Maze.PACMAN_DIE:
             if self.__is_time_elapsed(current_time, Maze.DELAY_1S_TIME):
                 if self.__ghosts: self.__ghosts = []
                 self.pacman.update()
-                if self.__is_time_elapsed(current_time, Maze.DELAY_1S_TIME*3.5):
+                if self.__is_time_elapsed(current_time, Maze.DELAY_1S_TIME * 3.5):
                     if self.game.game_status.lives == 0:
                         game.Game.get_instance().switch_scene('GameOver')
                         return
                     self.respawn()
                     self.set_state(Maze.READY)
-            else: return
+            else:
+                return
 
     def respawn(self):
         self.add_entity(Pacman(), (23, 14))
         self.__ghosts = []
-        self.add_entity(ghost.GhostRed(), ghost.RedAIStrategy.SPAWN_ROW_COL)
-        self.add_entity(ghost.GhostOrange(), ghost.OrangeAIStrategy.SPAWN_POS)
+        # self.add_entity(ghost.GhostRed(), ghost.RedAIStrategy.SPAWN_ROW_COL)
+        # self.add_entity(ghost.GhostOrange(), ghost.OrangeAIStrategy.SPAWN_POS)
+        self.add_entity(ghost.GhostPink(), ghost.PinkAIStrategy.SPAWN_POS)
         # pass
 
     def update_entity(self, entity):
