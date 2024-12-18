@@ -76,10 +76,19 @@ class Maze:
     def respawn(self):
         self.add_entity(Pacman(), (23, 14))
         self.__ghosts = []
-        # self.add_entity(ghost.GhostRed(), ghost.RedAIStrategy.SPAWN_ROW_COL)
-        # self.add_entity(ghost.GhostOrange(), ghost.OrangeAIStrategy.SPAWN_POS)
+        self.add_entity(ghost.GhostRed(), ghost.RedAIStrategy.SPAWN_ROW_COL)
+        self.add_entity(ghost.GhostOrange(), ghost.OrangeAIStrategy.SPAWN_POS)
         self.add_entity(ghost.GhostPink(), ghost.PinkAIStrategy.SPAWN_POS)
         # pass
+
+    def is_valid_position(self, position):
+        """
+        Kiểm tra xem vị trí có hợp lệ trong mê cung không.
+        """
+        r, c = helper.pixel_to_grid(position)  # Chuyển pixel sang chỉ số hàng, cột
+        if 0 <= r < len(self.__grid) and 0 <= c < len(self.__grid[0]):
+            return self.__grid[r][c] != Maze.WALL  # Kiểm tra nếu không phải là tường
+        return False  # Nếu ra ngoài phạm vi hoặc là tường, trả về False
 
     def update_entity(self, entity):
         entity.update()

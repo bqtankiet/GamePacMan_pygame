@@ -210,13 +210,12 @@ import pygame
 
 
 class OrangeAIStrategy(BasicAIStrategy):
-    SPAWN_ROW_COL = (14, 14)
+    SPAWN_ROW_COL = (15, 14)
     SPAWN_POS = (SPAWN_ROW_COL[1], SPAWN_ROW_COL[0])  # x, y
     SCATTER_POS = (1, 29)
     SCATTER_DURATION = 10
     CHASE_DURATION = 20
-    WAITING_DURATION = 5
-    STUCK_THRESHOLD = 2000  # Time threshold (in milliseconds) to check if Clyde is stuck at a corner
+    WAITING_DURATION = 15
 
     def __init__(self):
         # Khởi tạo đúng các thuộc tính của lớp cha
