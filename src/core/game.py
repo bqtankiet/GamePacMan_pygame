@@ -87,6 +87,11 @@ class GameStatus:
         self.lives = 3
         self.level = 1
 
+    def increase_level(self):
+        self.level += 1
+        print(f"Level {self.level}")
+
+
     def start_game(self):
         self.start = pygame.time.get_ticks()
         self.total_pause_duration = 0
