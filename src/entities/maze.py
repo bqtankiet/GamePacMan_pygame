@@ -41,27 +41,60 @@ class Maze:
             self.update_entity(self.pacman)
             for g in self.__ghosts: self.update_entity(g)
 
+            # Kiểm tra xem tất cả các hạt đã bị ăn chưa
+            if self.is_all_pellets_eaten():
+                # Chuyển sang màn tiếp theo
+                self.transition_to_next_level()
+
         elif self.__state == Maze.READY:
             if self.__is_time_elapsed(current_time, Maze.READY_TIME):
                 self.set_state(Maze.PLAYING)
-            else: return
+            else:
+                return
 
         elif self.__state == Maze.EAT_GHOST:
             if self.__is_time_elapsed(current_time, Maze.DELAY_1S_TIME):
                 self.set_state(Maze.PLAYING)
-            else: return
+            else:
+                return
 
         elif self.__state == Maze.PACMAN_DIE:
             if self.__is_time_elapsed(current_time, Maze.DELAY_1S_TIME):
                 if self.__ghosts: self.__ghosts = []
                 self.pacman.update()
-                if self.__is_time_elapsed(current_time, Maze.DELAY_1S_TIME*3.5):
+                if self.__is_time_elapsed(current_time, Maze.DELAY_1S_TIME * 3.5):
                     if self.game.game_status.lives == 0:
                         game.Game.get_instance().switch_scene('GameOver')
                         return
                     self.respawn()
                     self.set_state(Maze.READY)
-            else: return
+                else:
+                    return
+
+    def is_all_pellets_eaten(self):
+        # Kiểm tra xem tất cả các hạt có bị ăn hết không
+        for row in self.__grid:
+            if self.PELLET in row or self.POWER_PELLET in row:
+                return False
+        return True
+
+    def transition_to_next_level(self):
+        # Reset lại các đối tượng và cấp độ
+        self.respawn()  # Đặt lại vị trí các đối tượng
+        self.game.game_status.increase_level()  # Tăng cấp độ trong trò chơi
+        self.reset_pellets()
+        # self.increase_ghost_speed()  # Tăng tốc độ của ghost
+        print("Next level!")
+        self.set_state(Maze.READY)  # Quay lại trạng thái READY để bắt đầu màn tiếp theo
+
+    def increase_ghost_speed(self):
+        # Tăng tốc độ của ghost
+        for ghost in self.__ghosts:
+            ghost.increase_speed()  # Giả sử class Ghost có phương thức increase_speed
+
+    def reset_pellets(self):
+        """Khôi phục lại các Pellet và Power Pellet từ MAZE_DATA gốc."""
+        self.__grid = copy.deepcopy(MAZE_DATA)
 
     def respawn(self):
         self.add_entity(Pacman(), (23, 14))
