@@ -4,13 +4,15 @@ from src.scenes.component import TextButton, ButtonGroup
 from src.scenes.scene import Scene
 from src.utils.constant import WIDTH, HEIGHT, SCALE
 from src.utils.image_loader import ImageLoader
+import src.core.game as g
 
 
 class PauseGame(Scene):
     """Màn hình PauseGame"""
 
-    def __init__(self, game):
-        super().__init__(game)
+    def __init__(self):
+        super().__init__()
+        self._game = g.Game.get_instance()
         # Định nghĩa các label
         self.__title = pygame.transform.scale_by(ImageLoader().text_image("Pause Game", "yellow"), 2)
         self.__score_label = ImageLoader().text_image(" Current score", "cyan")
@@ -88,10 +90,13 @@ class PauseGame(Scene):
 
     def update(self):
         self.__button_group.update() # Cập nhật lại trạng thái các button
-        self.render_surface() # Cập nhật lại giao diện
 
-    def reset(self):
+    def reset(self): pass
+
+    def on_enter(self):
         self.__button_group.reset()
+
+        # render status: score, highest_score, time
         current_time = self._game.game_status.current_time()
         score = self._game.game_status.current_score()
         highest_score = self._game.game_status.highest_score()
