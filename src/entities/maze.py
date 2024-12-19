@@ -67,7 +67,7 @@ class Maze:
         self.add_entity(Pacman(), (23, 14))
         self.__ghosts = []
         self.add_entity(ghost.GhostRed(), ghost.RedAIStrategy.SPAWN_ROW_COL)
-        # self.add_entity(ghost.GhostOrange(), ghost.OrangeAIStrategy.SPAWN_POS)
+        self.add_entity(ghost.GhostOrange(), ghost.OrangeAIStrategy.SPAWN_POS)
         # pass
 
     def update_entity(self, entity):
