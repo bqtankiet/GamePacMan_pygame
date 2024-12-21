@@ -35,6 +35,7 @@ class Maze:
         self.game = game
         self.maze_render = None
 
+
     def update(self):
         current_time = pygame.time.get_ticks()
         if self.__state == Maze.PLAYING:
@@ -78,19 +79,28 @@ class Maze:
                 return False
         return True
 
+#Cập nhật level - tăng tốc ghost:
+#----------------------------------------------------------------
     def transition_to_next_level(self):
         # Reset lại các đối tượng và cấp độ
         self.respawn()  # Đặt lại vị trí các đối tượng
         self.game.game_status.increase_level()  # Tăng cấp độ trong trò chơi
+        # self.set_speed_based_on_level()
+        self.next_level()
         self.reset_pellets()
-        # self.increase_ghost_speed()  # Tăng tốc độ của ghost
         print("Next level!")
         self.set_state(Maze.READY)  # Quay lại trạng thái READY để bắt đầu màn tiếp theo
 
-    def increase_ghost_speed(self):
+    def set_speed_based_on_level(self):
         # Tăng tốc độ của ghost
-        for ghost in self.__ghosts:
-            ghost.increase_speed()  # Giả sử class Ghost có phương thức increase_speed
+        for g in self.__ghosts:
+            g.set_speed_based_on_level()
+
+    def next_level(self):
+        # Tăng cấp độ cho Ghost khi qua cấp mới
+        for g in self.__ghosts:
+            g.level = self.game.game_status.level  # Cập nhật cấp độ cho ghost
+            g.set_speed_based_on_level()  # Điều chỉnh lại tốc độ của ghost theo cấp độ mới
 
     def reset_pellets(self):
         """Khôi phục lại các Pellet và Power Pellet từ MAZE_DATA gốc."""
@@ -101,7 +111,10 @@ class Maze:
         self.__ghosts = []
         self.add_entity(ghost.GhostRed(), ghost.RedAIStrategy.SPAWN_ROW_COL)
         self.add_entity(ghost.GhostOrange(), ghost.OrangeAIStrategy.SPAWN_POS)
-        # pass
+
+        # Giữ nguyên tốc độ của ghost theo cấp độ hiện tại
+        self.set_speed_based_on_level()
+#--------------------------------------------------------------------------------
 
     def update_entity(self, entity):
         entity.update()
@@ -152,6 +165,7 @@ class Maze:
             self.pacman.die()
             self.game.game_status.decrease_lives()
             print("Pacman die")
+
 
     def __handle_pacman_pellet_collision(self, r, c):
         value = self.__grid[r][c]

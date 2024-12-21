@@ -86,4 +86,7 @@ class GameOver(Scene):
         self.__highest_score = ImageLoader().text_image(f'{highest_score}')
         self.__time = ImageLoader().text_image(f"{current_time[0]}'{current_time[1]:02}")
 
-
+    def play_again(self):
+        """Khi bấm Play Again, reset game và quay lại level 1"""
+        self._game.game_status.start_game()  # Reset game, bao gồm cả level
+        self._game.switch_scene("GamePlay", reset=True)  # Quay lại màn chơi
