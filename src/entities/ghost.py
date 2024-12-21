@@ -1,4 +1,6 @@
 import random
+
+import ghost
 import pygame
 from src.entities.Sprite import Sprite
 from src.entities.animation import Animation
@@ -85,7 +87,13 @@ class GhostOrange(Ghost):
 
 # TODO: Tương tự GhostCyan - thay đổi phương thức name "ghost_cyan", thay đổi chiến thuật AI "CyanAIStrategy"
 class GhostCyan(Ghost):
-    pass
+    def __init__(self):
+        animation = Animation(self, 'ghost_cyan')
+        hitbox = pygame.Rect(0, 0, BLOCK_SIZE * SCALE, BLOCK_SIZE * SCALE)
+        super().__init__(animation, hitbox, CyanAIStrategy())
+
+    def name(self):
+        return 'ghost_cyan'
 
 
 # TODO: Tương tự GhostPink - thay đổi phương thức name "ghost_pink", thay đổi chiến thuật AI "PinkAIStrategy"
@@ -109,19 +117,21 @@ class BasicAIStrategy(ABC):
     def __init__(self):
         self.scatter_step = 0  # Bước hiện tại trong chế độ SCATTER
         self.algo = AStarPathfinding()  # Thuật toán tìm đường A*
+        self.last_direction = None  # Lưu hướng cuối cùng mà AI đã di chuyển
 
     @abstractmethod
     def execute(self, ghost, maze):
         pass
 
-    def move_to(self, ghost, dest):
+    def move_to(self, ghost, dest, maze):
         # Di chuyển Ghost đến đích
-        path = self.algo.execute(ghost.get_position(), dest)
+        path = self.algo.execute(ghost.get_position(), dest, maze)  # Truyền maze cho thuật toán A*
         if path is None:
             # Nếu không tìm thấy đường, chọn hướng ngẫu nhiên
             directs = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]
             random_choice = random.choice(directs)
             ghost.set_next_direction(random_choice)
+            self.last_direction = random_choice  # Cập nhật hướng cuối cùng
         elif path and len(path) > 0:
             # Kiểm tra nếu Ghost đang ở trung tâm ô hiện tại
             hitbox_center = ghost.get_hitbox().center
@@ -129,22 +139,29 @@ class BasicAIStrategy(ABC):
             center_x = int(c * BLOCK_SIZE * SCALE + (BLOCK_SIZE * SCALE) // 2)
             center_y = int(r * BLOCK_SIZE * SCALE + (BLOCK_SIZE * SCALE) // 2)
 
-            # debugger.set_attributes('path', path)
-            debugger.set_attributes('path_pink', path)
+            debugger.set_attributes('path_cyan', path)
             next = path[0].position  # Lấy bước tiếp theo
             dx = next[0] - ghost.get_position()[0]
             dy = next[1] - ghost.get_position()[1]
 
             # Chỉ thay đổi hướng khi Ghost ở trung tâm ô
             if hitbox_center[0] == center_x and hitbox_center[1] == center_y:
-                if dx > 0:
-                    ghost.set_next_direction(Direction.RIGHT)
-                elif dx < 0:
-                    ghost.set_next_direction(Direction.LEFT)
-                elif dy > 0:
-                    ghost.set_next_direction(Direction.DOWN)
-                elif dy < 0:
-                    ghost.set_next_direction(Direction.UP)
+                current_direction = ghost.get_direction()
+                new_direction = None
+
+                if dx > 0 and current_direction != Direction.LEFT:
+                    new_direction = Direction.RIGHT
+                elif dx < 0 and current_direction != Direction.RIGHT:
+                    new_direction = Direction.LEFT
+                elif dy > 0 and current_direction != Direction.UP:
+                    new_direction = Direction.DOWN
+                elif dy < 0 and current_direction != Direction.DOWN:
+                    new_direction = Direction.UP
+
+                # Chỉ thay đổi hướng nếu không quay đầu lại
+                if new_direction and new_direction != self.last_direction:
+                    ghost.set_next_direction(new_direction)
+                    self.last_direction = new_direction  # Cập nhật hướng cuối cùng
 
 
 """ Chiến lược riêng cho GhostRed """
@@ -183,7 +200,7 @@ class RedAIStrategy(BasicAIStrategy):
             dest = self.SPAWN_POS
             ghost._speed = 1
 
-        self.move_to(ghost, dest)
+        self.move_to(ghost, dest, maze)
 
     def auto_switch_mode(self, ghost):
         # Tự động chuyển trạng thái dựa trên thời gian
@@ -225,7 +242,6 @@ class OrangeAIStrategy(BasicAIStrategy):
 
     def execute(self, ghost, maze):
         """Thực thi thuật toán AI của Clyde"""
-        global dest
         self.auto_switch_mode(ghost)
 
         pacman_pos = maze.get_pacman_pos()
@@ -263,7 +279,7 @@ class OrangeAIStrategy(BasicAIStrategy):
             dest = self.SPAWN_POS
             ghost._speed = 1
 
-        self.move_to(ghost, dest)
+        self.move_to(ghost, dest, maze)
 
     def auto_switch_mode(self, ghost):
         """Chuyển đổi giữa các chế độ hoạt động tự động"""
@@ -327,7 +343,7 @@ class PinkAIStrategy(BasicAIStrategy):
             target_pos = self.SPAWN_POS
             ghost._speed = 1
 
-        self.move_to(ghost, target_pos)
+        self.move_to(ghost, target_pos, maze)
 
     def auto_switch_mode(self, ghost):
         """
@@ -375,7 +391,90 @@ class PinkAIStrategy(BasicAIStrategy):
 
 # TODO: Có thể tương tự RedAIStrategy - thay đổi các chiến lược như: thời gian, vị trí di chuyển ...
 class CyanAIStrategy(BasicAIStrategy):
+    SPAWN_ROW_COL = (11, 14)  # Vị trí spawn
+    SPAWN_POS = (SPAWN_ROW_COL[1], SPAWN_ROW_COL[0])
+    SCATTER_POS = (26, 29)  # Góc dưới bên phải
+    SCATTER_DURATION = 5
+    CHASE_DURATION = 20
+    WAITING_DURATION = 15
 
     def execute(self, ghost, maze):
-        """ Hàm kế thừa từ lớp BasicAIStrategy để thực thi thuật toán"""
-        pass
+        self.auto_switch_mode(ghost)
+        # if ghost.mode is None:
+        #     ghost._speed = 0
+        #     return
+        if ghost.mode == Ghost.CHASE:
+            target_pos = self.calculate_target_position(maze)
+            ghost._speed = 2
+        elif ghost.mode == Ghost.FRIGHTENED:
+            target_pos = self.SPAWN_POS
+            ghost._speed = 1
+        elif ghost.mode == Ghost.SCATTER:
+            target_pos = self.SCATTER_POS
+            ghost._speed = 2
+        elif ghost.mode == Ghost.DEAD:
+            target_pos = self.SPAWN_POS
+            ghost._speed = 5
+        else:
+            target_pos = self.SPAWN_POS
+            ghost._speed = 1
+
+        self.move_to(ghost, target_pos, maze)
+
+    def auto_switch_mode(self, ghost):
+        if ghost.mode == Ghost.FRIGHTENED:
+            return
+        if ghost.mode == Ghost.DEAD and ghost.get_position() == self.SPAWN_POS:
+            ghost.mode_duration = 0
+            ghost.mode = None
+            return
+
+        if ghost.last_time_switch_mode == 0:
+            ghost.last_time_switch_mode = pygame.time.get_ticks()
+
+        delta_time = (pygame.time.get_ticks() - ghost.last_time_switch_mode) // 1000
+
+        if ghost.mode is None and delta_time > self.WAITING_DURATION:
+            ghost.switch_mode(Ghost.CHASE, self.CHASE_DURATION)
+        elif delta_time > self.CHASE_DURATION and ghost.mode != Ghost.SCATTER:
+            ghost.switch_mode(Ghost.SCATTER, self.SCATTER_DURATION)
+        elif delta_time > self.SCATTER_DURATION and ghost.mode != Ghost.CHASE:
+            ghost.switch_mode(Ghost.CHASE, self.CHASE_DURATION)
+
+    def calculate_target_position(self, maze):
+        """Tính toán vị trí mục tiêu của Inky."""
+        pacman_pos = maze.get_pacman_pos()
+        pacman_dir = maze.get_pacman_direction()
+
+        # Tìm Blinky (ghost đỏ)
+        blinky = None
+        ghosts = maze.get_ghosts()
+        for g in maze.get_ghosts():
+            if isinstance(g, GhostRed):
+                blinky = g
+                break
+
+        if blinky is None:
+            return pacman_pos  # Nếu không tìm thấy Blinky, đuổi theo Pacman
+
+        # Vị trí 2 ô phía trước Pacman
+        if pacman_dir == Direction.UP:
+            target_temp = (pacman_pos[0], pacman_pos[1] - 2)
+        elif pacman_dir == Direction.DOWN:
+            target_temp = (pacman_pos[0], pacman_pos[1] + 2)
+        elif pacman_dir == Direction.LEFT:
+            target_temp = (pacman_pos[0] - 2, pacman_pos[1])
+        elif pacman_dir == Direction.RIGHT:
+            target_temp = (pacman_pos[0] + 2, pacman_pos[1])
+        else:
+            target_temp = pacman_pos  # Trường hợp không có hướng
+
+        # Vector từ Blinky đến vị trí tạm tính
+        vector_x = target_temp[0] - blinky.get_position()[0]
+        vector_y = target_temp[1] - blinky.get_position()[1]
+
+        # Nhân đôi vector và cộng vào vị trí Blinky để có mục tiêu cuối cùng
+        target_x = blinky.get_position()[0] + (2 * vector_x)
+        target_y = blinky.get_position()[1] + (2 * vector_y)
+
+        return (target_x, target_y)

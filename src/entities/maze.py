@@ -35,12 +35,21 @@ class Maze:
         self.__state = Maze.READY
         self.game = game
         self.maze_render = None
+        self.ghost_positions = {
+            "red": (11, 14),
+            "pink": (13, 14),
+            "cyan": (11, 14),
+            "orange": (15, 14)
+        }
 
     def get_pacman_direction(self):
         """Trả về hướng đi hiện tại của Pacman."""
         if self.pacman:
             return self.pacman.get_direction()
         return None  # Trường hợp Pacman chưa được khởi tạo
+
+    def get_ghost_position(self, ghost_name):
+        return self.ghost_positions.get(ghost_name, None)
 
     def update(self):
         current_time = pygame.time.get_ticks()
@@ -79,7 +88,12 @@ class Maze:
         self.add_entity(ghost.GhostRed(), ghost.RedAIStrategy.SPAWN_ROW_COL)
         self.add_entity(ghost.GhostOrange(), ghost.OrangeAIStrategy.SPAWN_POS)
         self.add_entity(ghost.GhostPink(), ghost.PinkAIStrategy.SPAWN_POS)
+        self.add_entity(ghost.GhostCyan(), ghost.CyanAIStrategy.SPAWN_POS)
         # pass
+
+    # Trong class Maze:
+    def get_ghosts(self):
+        return self.__ghosts
 
     def is_valid_position(self, position):
         """

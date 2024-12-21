@@ -6,11 +6,11 @@ class AStarPathfinding:
     # def __init__(self, grid):
     #     self.__grid = grid
 
-    def execute(self, start, dest):
+    def execute(self, start, dest, maze):
         explored = set()
         pq = PriorityQueue()
         node = Node(start)
-        node.hCost = abs(dest[0]-start[0]) + abs(dest[1]-start[1])
+        node.hCost = abs(dest[0] - start[0]) + abs(dest[1] - start[1])
         node.gCost = 0
         pq.push(node.get_fCost(), node)
         while not pq.is_empty():
@@ -20,8 +20,8 @@ class AStarPathfinding:
             for n in current_node.get_neighbors():
                 if n.position in explored: continue
                 n.parent = current_node
-                n.gCost = current_node.gCost+1
-                n.hCost = abs(dest[0]-n.position[0]) + abs(dest[1]-n.position[1])
+                n.gCost = current_node.gCost + 1
+                n.hCost = abs(dest[0] - n.position[0]) + abs(dest[1] - n.position[1])
                 if not pq.__contains__(n): pq.push(n.get_fCost(), n)
         return None
 
@@ -33,6 +33,7 @@ class AStarPathfinding:
             current = current.parent
         return path
 
+
 class Node:
     def __init__(self, position):
         self.position = position
@@ -40,7 +41,7 @@ class Node:
         self.hCost = 0
         self.parent = None
 
-    def get_fCost (self):
+    def get_fCost(self):
         return self.gCost + self.hCost
 
     def get_neighbors(self):
@@ -66,7 +67,10 @@ class Node:
     def __eq__(self, other):
         return self.position == other.position
 
+
 import heapq
+
+
 class PriorityQueue:
     def __init__(self):
         self.heap = []  # Danh sách dùng làm heap
@@ -93,9 +97,10 @@ class PriorityQueue:
     def __contains__(self, item):
         return any(entry[1] == item for entry in self.heap)
 
+
 if __name__ == '__main__':
     start = (1, 1)
     dest = (0, 0)
-    path = AStarPathfinding().execute(start, dest)
+    maze = MAZE_DATA
+    path = AStarPathfinding().execute(start, dest,MAZE_DATA)
     print(path)
-
