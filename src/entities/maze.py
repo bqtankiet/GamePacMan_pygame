@@ -4,14 +4,13 @@ import pygame
 import src.entities.ghost as ghost
 import src.core.game as game
 from src.entities.Sprite import Sprite
+import src.entities.ai_strategy as ai
 from src.entities.pacman import Pacman
 from src.utils.constant import BLOCK_SIZE, SCALE, WIDTH, HEIGHT, MAZE_DATA
 from src.utils.enum import Direction
 from src.utils.image_loader import ImageLoader
 import src.utils.helper as helper
 import src.utils.debugger as debugger
-from src.utils.level_setting import get_level_setting
-
 
 
 class Maze:
@@ -27,7 +26,7 @@ class Maze:
     READY_TIME = 3000  # milliseconds
     DELAY_1S_TIME = 1000  # miliseconds
 
-    def __init__(self, game):
+    def __init__(self):
         self.pacman = None
         self.__ghosts = []
         self.respawn()
@@ -35,7 +34,6 @@ class Maze:
         self.__collision_manager = CollisionManager(self.__grid)
         self.__start_time = pygame.time.get_ticks()
         self.__state = Maze.READY
-        self.game = game
         self.maze_render = None
         # self.ghost_positions = {
         #     "red": RedAIStrategy.SPAWN_ROW_COL,
@@ -82,7 +80,7 @@ class Maze:
                 if self.__ghosts: self.__ghosts = []
                 self.pacman.update()
                 if self.__is_time_elapsed(current_time, Maze.DELAY_1S_TIME * 3.5):
-                    if self.game.game_status.lives == 0:
+                    if game.Game.get_instance().game_status.lives == 0:
                         game.Game.get_instance().switch_scene('GameOver')
                         return
                     self.respawn()
@@ -101,18 +99,17 @@ class Maze:
 #----------------------------------------------------------------
     def transition_to_next_level(self):
         # Reset lại các đối tượng và cấp độ
-        self.respawn()  # Đặt lại vị trí các đối tượng
-        self.game.game_status.increase_level()  # Tăng cấp độ trong trò chơi
+        game.Game.get_instance().game_status.increase_level()  # Tăng cấp độ trong trò chơi
         # self.set_speed_based_on_level()
         self.next_level()
         self.reset_pellets()
         print("Next level!")
+        self.respawn()
         self.set_state(Maze.READY)  # Quay lại trạng thái READY để bắt đầu màn tiếp theo
 
     def set_speed_based_on_level(self):
         level = game.Game.get_instance().game_status.level
         # Tăng tốc độ pacman
-        self.pacman._speed = get_level_setting(level)['speed']
         # Tăng tốc độ của ghost
         for g in self.__ghosts:
             g.level = level
@@ -121,7 +118,7 @@ class Maze:
     def next_level(self):
         # Tăng cấp độ cho Ghost khi qua cấp mới
         for g in self.__ghosts:
-            g.level = self.game.game_status.level  # Cập nhật cấp độ cho ghost
+            g.level = game.Game.get_instance().game_status.level  # Cập nhật cấp độ cho ghost
             g.set_speed_based_on_level()  # Điều chỉnh lại tốc độ của ghost theo cấp độ mới
 
     def reset_pellets(self):
@@ -132,10 +129,21 @@ class Maze:
     def respawn(self):
         self.add_entity(Pacman(), (23, 14))
         self.__ghosts = []
-        self.add_entity(ghost.GhostRed(), ghost.RedAIStrategy.SPAWN_ROW_COL)
-        self.add_entity(ghost.GhostOrange(), ghost.OrangeAIStrategy.SPAWN_ROW_COL)
-        # self.add_entity(ghost.GhostPink(), ghost.PinkAIStrategy.SPAWN_ROW_COL)
-        # self.add_entity(ghost.GhostCyan(), ghost.CyanAIStrategy.SPAWN_ROW_COL)
+        level = game.Game.get_instance().game_status.level
+        if level == 1:
+            self.add_entity(ghost.GhostRed(ai.RedAIStrategyLv1()), ai.RedAIStrategyLv1.SPAWN_ROW_COL)
+            self.add_entity(ghost.GhostOrange(ai.OrangeAIStrategyLv1()), ai.OrangeAIStrategyLv1.SPAWN_ROW_COL)
+        elif level == 2:
+            self.add_entity(ghost.GhostRed(ai.RedAIStrategyLv2()), ai.RedAIStrategyLv2.SPAWN_ROW_COL)
+            self.add_entity(ghost.GhostOrange(ai.OrangeAIStrategyLv2()), ai.OrangeAIStrategyLv2.SPAWN_ROW_COL)
+            self.add_entity(ghost.GhostPink(ai.PinkAIStrategyLv2()), ai.PinkAIStrategyLv2.SPAWN_ROW_COL)
+            self.add_entity(ghost.GhostCyan(ai.CyanAIStrategyLv2()), ai.CyanAIStrategyLv2.SPAWN_ROW_COL)
+        elif level == 3:
+            # self.pacman._speed = 3 # Tăng tốc độ Pacman nếu ghost nhanh quá
+            self.add_entity(ghost.GhostRed(ai.RedAIStrategyLv3()), ai.RedAIStrategyLv3.SPAWN_ROW_COL)
+            self.add_entity(ghost.GhostOrange(ai.OrangeAIStrategyLv3()), ai.OrangeAIStrategyLv3.SPAWN_ROW_COL)
+            self.add_entity(ghost.GhostPink(ai.PinkAIStrategyLv3()), ai.PinkAIStrategyLv3.SPAWN_ROW_COL)
+            self.add_entity(ghost.GhostCyan(ai.CyanAIStrategyLv3()), ai.CyanAIStrategyLv3.SPAWN_ROW_COL)
 
         # Giữ nguyên tốc độ của ghost theo cấp độ hiện tại
         self.set_speed_based_on_level()
@@ -196,13 +204,14 @@ class Maze:
         if g.mode == ghost.Ghost.FRIGHTENED:
             self.set_state(Maze.EAT_GHOST)
             g.switch_mode(ghost.Ghost.DEAD, 99)
-            self.game.game_status.increase_score(game.GameStatus.SCORE_GHOST)
+            game.Game.get_instance().game_status.increase_score(game.GameStatus.SCORE_GHOST)
             print("Pacman eat ghost")
         else:
+            if debugger.is_god_mode(): return # god mode: Pacman bất tử
             if self.__state == Maze.PACMAN_DIE: return
             self.set_state(Maze.PACMAN_DIE)
-            self.pacman.die()
-            self.game.game_status.decrease_lives()
+            pacman.die()
+            game.Game.get_instance().game_status.decrease_lives()
             print("Pacman die")
 
 
@@ -210,10 +219,10 @@ class Maze:
         value = self.__grid[r][c]
         if value == self.PELLET:
             self.__grid[r][c] = 0
-            self.game.game_status.increase_score(game.GameStatus.SCORE_PELLET)
+            game.Game.get_instance().game_status.increase_score(game.GameStatus.SCORE_PELLET)
         elif value == self.POWER_PELLET:
             self.__grid[r][c] = 0
-            self.game.game_status.increase_score(game.GameStatus.SCORE_POWER_PELLET)
+            game.Game.get_instance().game_status.increase_score(game.GameStatus.SCORE_POWER_PELLET)
             for g in self.__ghosts:
                 g.switch_mode(ghost.Ghost.FRIGHTENED, 5)
             print("Eat Power pellet")

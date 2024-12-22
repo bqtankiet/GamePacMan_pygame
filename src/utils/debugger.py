@@ -3,13 +3,13 @@ import pygame.draw
 from src.utils.constant import BLOCK_SIZE, SCALE
 
 """Module phục vụ cho việc debug"""
+
 ghost_paths = {
     'ghost_red': 'path_red',
     'ghost_orange': 'path_orange',
     'ghost_cyan': 'path_cyan',
     'ghost_pink': 'path_pink'
 }
-
 attributes = {}
 mode = None
 
@@ -62,3 +62,7 @@ def set_attributes(key, attr):
 
 def get_attributes(key):
     if key in attributes: return attributes[key]
+
+def is_god_mode():
+    return mode == 'f3'
+

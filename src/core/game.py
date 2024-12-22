@@ -97,7 +97,6 @@ class GameStatus:
         self.total_pause_duration = 0
         self.score = 0
         self.lives = 3
-        self.level = 1
         self.pause_start = None
 
 
