@@ -37,12 +37,12 @@ class Maze:
         self.__state = Maze.READY
         self.game = game
         self.maze_render = None
-        self.ghost_positions = {
-            "red": (11, 14),
-            "pink": (13, 14),
-            "cyan": (11, 14),
-            "orange": (15, 14)
-        }
+        # self.ghost_positions = {
+        #     "red": RedAIStrategy.SPAWN_ROW_COL,
+        #     "pink": PinkAIStrategy.SPAWN_ROW_COL,
+        #     "cyan": CyanAIStrategy.SPAWN_ROW_COL,
+        #     "orange": OrangeAIStrategy.SPAWN_ROW_COL
+        # }
 
     def get_pacman_direction(self):
         """Trả về hướng đi hiện tại của Pacman."""
@@ -50,8 +50,8 @@ class Maze:
             return self.pacman.get_direction()
         return None  # Trường hợp Pacman chưa được khởi tạo
 
-    def get_ghost_position(self, ghost_name):
-        return self.ghost_positions.get(ghost_name, None)
+    # def get_ghost_position(self, ghost_name):
+    #     return self.ghost_positions.get(ghost_name, None)
 
 
     def update(self):
@@ -133,9 +133,9 @@ class Maze:
         self.add_entity(Pacman(), (23, 14))
         self.__ghosts = []
         self.add_entity(ghost.GhostRed(), ghost.RedAIStrategy.SPAWN_ROW_COL)
-        self.add_entity(ghost.GhostOrange(), ghost.OrangeAIStrategy.SPAWN_POS)
-        self.add_entity(ghost.GhostPink(), ghost.PinkAIStrategy.SPAWN_POS)
-        self.add_entity(ghost.GhostCyan(), ghost.CyanAIStrategy.SPAWN_POS)
+        self.add_entity(ghost.GhostOrange(), ghost.OrangeAIStrategy.SPAWN_ROW_COL)
+        self.add_entity(ghost.GhostPink(), ghost.PinkAIStrategy.SPAWN_ROW_COL)
+        self.add_entity(ghost.GhostCyan(), ghost.CyanAIStrategy.SPAWN_ROW_COL)
 
         # Giữ nguyên tốc độ của ghost theo cấp độ hiện tại
         self.set_speed_based_on_level()

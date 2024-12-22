@@ -1,15 +1,12 @@
-import random
-
-import pygame
-
 from src.entities.Sprite import Sprite
 from src.entities.animation import Animation
 from src.utils.astar_pathfinding import AStarPathfinding
-from src.utils.constant import BLOCK_SIZE, SCALE, MAZE_DATA
+from src.utils.constant import BLOCK_SIZE, SCALE
 from src.utils.enum import Direction
 import src.utils.debugger as debugger
 import src.core.game as game
 from src.utils.level_setting import get_level_setting
+import pygame
 
 
 class Ghost(Sprite):
@@ -95,6 +92,7 @@ class GhostRed(Ghost):
     def __init__(self):
         animation = Animation(self, 'ghost_red')  # Animation mặc định
         hitbox = pygame.Rect(0, 0, BLOCK_SIZE * SCALE, BLOCK_SIZE * SCALE)  # Kích thước hitbox
+        self.mode = Ghost.CHASE
         super().__init__(animation, hitbox, RedAIStrategy())
 
     def name(self):
@@ -145,21 +143,20 @@ class BasicAIStrategy(ABC):
     def __init__(self):
         self.scatter_step = 0  # Bước hiện tại trong chế độ SCATTER
         self.algo = AStarPathfinding()  # Thuật toán tìm đường A*
-        self.last_direction = None  # Lưu hướng cuối cùng mà AI đã di chuyển
 
     @abstractmethod
     def execute(self, ghost, maze):
         pass
 
-    def move_to(self, ghost, dest, maze):
+    def move_to(self, ghost, dest):
         # Di chuyển Ghost đến đích
-        path = self.algo.execute(ghost.get_position(), dest, maze)  # Truyền maze cho thuật toán A*
-        if path is None:
-            # Nếu không tìm thấy đường, chọn hướng ngẫu nhiên
-            directs = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]
-            random_choice = random.choice(directs)
-            ghost.set_next_direction(random_choice)
-            self.last_direction = random_choice  # Cập nhật hướng cuối cùng
+        path = self.algo.execute(ghost.get_position(), dest)  # Truyền maze cho thuật toán A*
+        if path is None: return
+            # # Nếu không tìm thấy đường, chọn hướng ngẫu nhiên
+            # directs = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]
+            # random_choice = random.choice(directs)
+            # ghost.set_next_direction(random_choice)
+            # self.last_direction = random_choice  # Cập nhật hướng cuối cùng
         elif path and len(path) > 0:
             # Kiểm tra nếu Ghost đang ở trung tâm ô hiện tại
             hitbox_center = ghost.get_hitbox().center
@@ -174,22 +171,15 @@ class BasicAIStrategy(ABC):
 
             # Chỉ thay đổi hướng khi Ghost ở trung tâm ô
             if hitbox_center[0] == center_x and hitbox_center[1] == center_y:
-                current_direction = ghost.get_direction()
-                new_direction = None
+                if dx > 0:
+                    ghost.set_next_direction(Direction.RIGHT)
+                elif dx < 0:
+                    ghost.set_next_direction(Direction.LEFT)
+                elif dy > 0:
+                    ghost.set_next_direction(Direction.DOWN)
+                elif dy < 0:
+                    ghost.set_next_direction(Direction.UP)
 
-                if dx > 0 and current_direction != Direction.LEFT:
-                    new_direction = Direction.RIGHT
-                elif dx < 0 and current_direction != Direction.RIGHT:
-                    new_direction = Direction.LEFT
-                elif dy > 0 and current_direction != Direction.UP:
-                    new_direction = Direction.DOWN
-                elif dy < 0 and current_direction != Direction.DOWN:
-                    new_direction = Direction.UP
-
-                # Chỉ thay đổi hướng nếu không quay đầu lại
-                if new_direction and new_direction != self.last_direction:
-                    ghost.set_next_direction(new_direction)
-                    self.last_direction = new_direction  # Cập nhật hướng cuối cùng
 
 
 """ Chiến lược riêng cho GhostRed """
@@ -197,12 +187,12 @@ class BasicAIStrategy(ABC):
 
 class RedAIStrategy(BasicAIStrategy):
     # Chiến lược AI cho Ghost đỏ
-    SPAWN_ROW_COL = (11, 14)  # Vị trí spawn ban đầu theo row, col trong grid
+    SPAWN_ROW_COL = (14, 18)  # Vị trí spawn ban đầu theo row, col trong grid
     SPAWN_POS = (SPAWN_ROW_COL[1], SPAWN_ROW_COL[0])  # Vị trí theo x,y
     SCATTER_POS = [(1, 1), (6, 5)]  # Các điểm đến trong chế độ SCATTER
     SCATTER_DURATION = 10  # Thời gian SCATTER
     CHASE_DURATION = 20  # Thời gian CHASE
-    WAITING_DURATION = 0  # Thời gian chờ trước khi bắt đầu
+    WAITING_DURATION = -1  # Thời gian chờ trước khi bắt đầu
 
     def execute(self, ghost, maze):
         # Tự động chuyển đổi trạng thái dựa trên thời gian
@@ -210,6 +200,7 @@ class RedAIStrategy(BasicAIStrategy):
         speed = ghost.level_speed
 
         # Xác định đích đến dựa trên trạng thái hiện tại
+        dest = maze.get_pacman_pos()
         if ghost.mode == Ghost.CHASE:
             dest = maze.get_pacman_pos()  # Đuổi theo Pacman
             ghost._speed = speed
@@ -229,7 +220,7 @@ class RedAIStrategy(BasicAIStrategy):
             dest = self.SPAWN_POS
             ghost._speed = 1
 
-        self.move_to(ghost, dest, maze)
+        self.move_to(ghost, dest)
 
     def auto_switch_mode(self, ghost):
         # Tự động chuyển trạng thái dựa trên thời gian
@@ -245,18 +236,17 @@ class RedAIStrategy(BasicAIStrategy):
 
         delta_time = (pygame.time.get_ticks() - ghost.last_time_switch_mode) // 1000
 
-        # Chuyển sang CHASE ngay sau khoảng chờ ban đầu
         if delta_time > self.WAITING_DURATION and ghost.mode is None:
             ghost.switch_mode(Ghost.CHASE, self.CHASE_DURATION)
+        elif delta_time > self.SCATTER_DURATION and ghost.mode != Ghost.CHASE:
+            ghost.switch_mode(Ghost.CHASE, self.CHASE_DURATION)
+        elif delta_time > self.CHASE_DURATION and ghost.mode != Ghost.SCATTER:
+            ghost.switch_mode(Ghost.SCATTER, self.SCATTER_DURATION)
 
 
 # TODO: Có thể tương tự RedAIStrategy - thay đổi các chiến lược như: thời gian, vị trí di chuyển ...
-import random
-import pygame
-
-
 class OrangeAIStrategy(BasicAIStrategy):
-    SPAWN_ROW_COL = (15, 14)
+    SPAWN_ROW_COL = (14, 9)
     SPAWN_POS = (SPAWN_ROW_COL[1], SPAWN_ROW_COL[0])  # x, y
     SCATTER_POS = (1, 29)
     SCATTER_DURATION = 10
@@ -276,7 +266,7 @@ class OrangeAIStrategy(BasicAIStrategy):
         pacman_pos = maze.get_pacman_pos()
         ghost_pos = ghost.get_position()
         distance = self.calculate_distance(pacman_pos, ghost_pos)
-
+        dest = None
         if ghost.mode == Ghost.CHASE:
             if distance > 8:
                 dest = pacman_pos
@@ -308,7 +298,7 @@ class OrangeAIStrategy(BasicAIStrategy):
             dest = self.SPAWN_POS
             ghost._speed = 1
 
-        self.move_to(ghost, dest, maze)
+        self.move_to(ghost, dest)
 
     def auto_switch_mode(self, ghost):
         """Chuyển đổi giữa các chế độ hoạt động tự động"""
@@ -339,7 +329,7 @@ class OrangeAIStrategy(BasicAIStrategy):
 
 # TODO: Có thể tương tự RedAIStrategy - thay đổi các chiến lược như: thời gian, vị trí di chuyển ...
 class PinkAIStrategy(BasicAIStrategy):
-    SPAWN_ROW_COL = (13, 14)
+    SPAWN_ROW_COL = (14, 15)
     SPAWN_POS = (SPAWN_ROW_COL[1], SPAWN_ROW_COL[0])  # x, y
     SCATTER_POS = (1, 29)
     SCATTER_DURATION = 5
@@ -373,7 +363,7 @@ class PinkAIStrategy(BasicAIStrategy):
             target_pos = self.SPAWN_POS
             ghost._speed = 1
 
-        self.move_to(ghost, target_pos, maze)
+        self.move_to(ghost, target_pos)
 
     def auto_switch_mode(self, ghost):
         """
@@ -421,7 +411,7 @@ class PinkAIStrategy(BasicAIStrategy):
 
 # TODO: Có thể tương tự RedAIStrategy - thay đổi các chiến lược như: thời gian, vị trí di chuyển ...
 class CyanAIStrategy(BasicAIStrategy):
-    SPAWN_ROW_COL = (11, 14)  # Vị trí spawn
+    SPAWN_ROW_COL = (14, 12)  # Vị trí spawn
     SPAWN_POS = (SPAWN_ROW_COL[1], SPAWN_ROW_COL[0])
     SCATTER_POS = (26, 29)  # Góc dưới bên phải
     SCATTER_DURATION = 5
@@ -449,7 +439,7 @@ class CyanAIStrategy(BasicAIStrategy):
             target_pos = self.SPAWN_POS
             ghost._speed = 1
 
-        self.move_to(ghost, target_pos, maze)
+        self.move_to(ghost, target_pos)
 
     def auto_switch_mode(self, ghost):
         if ghost.mode == Ghost.FRIGHTENED:

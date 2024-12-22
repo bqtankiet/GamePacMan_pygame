@@ -6,7 +6,7 @@ class AStarPathfinding:
     # def __init__(self, grid):
     #     self.__grid = grid
 
-    def execute(self, start, dest, maze):
+    def execute(self, start, dest):
         explored = set()
         pq = PriorityQueue()
         node = Node(start)
@@ -102,5 +102,5 @@ if __name__ == '__main__':
     start = (1, 1)
     dest = (0, 0)
     maze = MAZE_DATA
-    path = AStarPathfinding().execute(start, dest,MAZE_DATA)
+    path = AStarPathfinding().execute(start, dest)
     print(path)
