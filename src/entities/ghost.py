@@ -14,13 +14,12 @@ class Ghost(Sprite):
     SCATTER = 3  # Trạng thái di chuyển về góc cố định
     DEAD = 4  # Trạng thái "chết", quay về điểm spawn
 
-    def __init__(self, animation, hitbox, ai_strategy, level = 1):
+    def __init__(self, animation, hitbox, ai_strategy):
         self.ai_strategy = ai_strategy  # Chiến lược AI điều khiển Ghost
         self.mode = None  # Trạng thái ban đầu
         self.is_frightened_flash = False  # Biến để xác định trạng thái nhấp nháy khi gần hết FRIGHTENED
         self.last_time_switch_mode = 0  # Thời gian chuyển trạng thái gần nhất
         self.mode_duration = 0  # Thời gian duy trì trạng thái hiện tại
-        self.level = level
 
         super().__init__(animation, hitbox)
 
@@ -33,22 +32,10 @@ class Ghost(Sprite):
     def execute_ai(self, maze):
         self.ai_strategy.execute(self, maze)  # Thực thi chiến lược AI
 
-#-----------------------------------------------------------
     #Tang Toc Do Ghost Qua Cac Level
     def set_speed_based_on_level(self):
         self.level = game.Game.get_instance().game_status.level
         print('level', self.level)
-        # if self.mode == Ghost.FRIGHTENED:
-        #     self._speed = 1
-        # elif self.mode == Ghost.CHASE:
-        #     self._speed = Ghost.CHASE + int((self.level - 1) * 1)
-        # elif self.mode == Ghost.SCATTER:
-        #     self._speed = Ghost.SCATTER + int((self.level - 1) * 0.5)
-        # elif self.mode == Ghost.DEAD:
-        #     self._speed = 4
-        # else:
-        #     self._speed = 1
-#------------------------------------------------------------
     def name(self):
         pass
 
