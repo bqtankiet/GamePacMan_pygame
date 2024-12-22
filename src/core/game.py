@@ -99,6 +99,7 @@ class GameStatus:
         self.lives = 3
         self.pause_start = None
 
+
     def pause(self):
         if self.pause_start is None:
             self.pause_start = pygame.time.get_ticks()
