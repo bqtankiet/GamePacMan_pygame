@@ -2,14 +2,16 @@ import copy
 import pygame
 
 import src.entities.ghost as ghost
-import src.core.game as game
+import src.core.game as game_module
 from src.entities.Sprite import Sprite
+import src.entities.ai_strategy as ai
 from src.entities.pacman import Pacman
 from src.utils.constant import BLOCK_SIZE, SCALE, WIDTH, HEIGHT, MAZE_DATA
 from src.utils.enum import Direction
 from src.utils.image_loader import ImageLoader
 import src.utils.helper as helper
 import src.utils.debugger as debugger
+
 
 class Maze:
     WALL = 1
@@ -22,9 +24,10 @@ class Maze:
     PACMAN_DIE = 3
 
     READY_TIME = 3000  # milliseconds
-    DELAY_1S_TIME = 1000 # miliseconds
+    DELAY_1S_TIME = 1000  # miliseconds
 
-    def __init__(self, game):
+    def __init__(self):
+        self.game = game_module.Game.get_instance()
         self.pacman = None
         self.__ghosts = []
         self.respawn()
@@ -32,8 +35,13 @@ class Maze:
         self.__collision_manager = CollisionManager(self.__grid)
         self.__start_time = pygame.time.get_ticks()
         self.__state = Maze.READY
-        self.game = game
         self.maze_render = None
+
+    def get_pacman_direction(self):
+        """Trả về hướng đi hiện tại của Pacman."""
+        if self.pacman:
+            return self.pacman.get_direction()
+        return None  # Trường hợp Pacman chưa được khởi tạo
 
     def update(self):
         current_time = pygame.time.get_ticks()
@@ -41,34 +49,92 @@ class Maze:
             self.update_entity(self.pacman)
             for g in self.__ghosts: self.update_entity(g)
 
+            # Kiểm tra xem tất cả các hạt đã bị ăn chưa
+            if self.is_all_pellets_eaten():
+                # Chuyển sang màn tiếp theo
+                self.transition_to_next_level()
+
         elif self.__state == Maze.READY:
             if self.__is_time_elapsed(current_time, Maze.READY_TIME):
                 self.set_state(Maze.PLAYING)
-            else: return
+            else:
+                return
 
         elif self.__state == Maze.EAT_GHOST:
             if self.__is_time_elapsed(current_time, Maze.DELAY_1S_TIME):
                 self.set_state(Maze.PLAYING)
-            else: return
+            else:
+                return
 
         elif self.__state == Maze.PACMAN_DIE:
             if self.__is_time_elapsed(current_time, Maze.DELAY_1S_TIME):
                 if self.__ghosts: self.__ghosts = []
                 self.pacman.update()
-                if self.__is_time_elapsed(current_time, Maze.DELAY_1S_TIME*3.5):
+                if self.__is_time_elapsed(current_time, Maze.DELAY_1S_TIME * 3.5):
                     if self.game.game_status.lives == 0:
-                        game.Game.get_instance().switch_scene('GameOver')
+                        self.game.switch_scene('GameOver')
                         return
                     self.respawn()
                     self.set_state(Maze.READY)
-            else: return
+                else:
+                    return
+
+    def is_all_pellets_eaten(self):
+        # Kiểm tra xem tất cả các hạt có bị ăn hết không
+        for row in self.__grid:
+            if self.PELLET in row or self.POWER_PELLET in row:
+                return False
+        return True
+
+#Cập nhật level - tăng tốc ghost:
+#----------------------------------------------------------------
+    def transition_to_next_level(self):
+        # Reset lại các đối tượng và cấp độ
+        self.next_level()
+        self.reset_pellets()
+        print("Next level!")
+        self.respawn()
+        self.set_state(Maze.READY)  # Quay lại trạng thái READY để bắt đầu màn tiếp theo
+
+    def next_level(self):
+        self.game.game_status.increase_level()  # Tăng cấp độ trong trò chơi
+
+    def reset_pellets(self):
+        """Khôi phục lại các Pellet và Power Pellet từ MAZE_DATA gốc."""
+        self.__grid = copy.deepcopy(MAZE_DATA)
+
 
     def respawn(self):
         self.add_entity(Pacman(), (23, 14))
         self.__ghosts = []
-        self.add_entity(ghost.GhostRed(), ghost.RedAIStrategy.SPAWN_ROW_COL)
-        self.add_entity(ghost.GhostOrange(), ghost.OrangeAIStrategy.SPAWN_POS)
-        # pass
+        level = self.game.game_status.level
+        if level == 1:
+            self.add_entity(ghost.GhostRed(ai.RedAIStrategyLv1()), ai.RedAIStrategyLv1.SPAWN_ROW_COL)
+            self.add_entity(ghost.GhostOrange(ai.OrangeAIStrategyLv1()), ai.OrangeAIStrategyLv1.SPAWN_ROW_COL)
+        elif level == 2:
+            self.add_entity(ghost.GhostRed(ai.RedAIStrategyLv2()), ai.RedAIStrategyLv2.SPAWN_ROW_COL)
+            self.add_entity(ghost.GhostOrange(ai.OrangeAIStrategyLv2()), ai.OrangeAIStrategyLv2.SPAWN_ROW_COL)
+            self.add_entity(ghost.GhostPink(ai.PinkAIStrategyLv2()), ai.PinkAIStrategyLv2.SPAWN_ROW_COL)
+            self.add_entity(ghost.GhostCyan(ai.CyanAIStrategyLv2()), ai.CyanAIStrategyLv2.SPAWN_ROW_COL)
+        elif level == 3:
+            # self.pacman._speed = 3 # Tăng tốc độ Pacman nếu ghost nhanh quá
+            self.add_entity(ghost.GhostRed(ai.RedAIStrategyLv3()), ai.RedAIStrategyLv3.SPAWN_ROW_COL)
+            self.add_entity(ghost.GhostOrange(ai.OrangeAIStrategyLv3()), ai.OrangeAIStrategyLv3.SPAWN_ROW_COL)
+            self.add_entity(ghost.GhostPink(ai.PinkAIStrategyLv3()), ai.PinkAIStrategyLv3.SPAWN_ROW_COL)
+            self.add_entity(ghost.GhostCyan(ai.CyanAIStrategyLv3()), ai.CyanAIStrategyLv3.SPAWN_ROW_COL)
+
+    # Trong class Maze:
+    def get_ghosts(self):
+        return self.__ghosts
+
+    def is_valid_position(self, position):
+        """
+        Kiểm tra xem vị trí có hợp lệ trong mê cung không.
+        """
+        r, c = helper.pixel_to_grid(position)  # Chuyển pixel sang chỉ số hàng, cột
+        if 0 <= r < len(self.__grid) and 0 <= c < len(self.__grid[0]):
+            return self.__grid[r][c] != Maze.WALL  # Kiểm tra nếu không phải là tường
+        return False  # Nếu ra ngoài phạm vi hoặc là tường, trả về False
 
     def update_entity(self, entity):
         entity.update()
@@ -111,23 +177,25 @@ class Maze:
         if g.mode == ghost.Ghost.FRIGHTENED:
             self.set_state(Maze.EAT_GHOST)
             g.switch_mode(ghost.Ghost.DEAD, 99)
-            self.game.game_status.increase_score(game.GameStatus.SCORE_GHOST)
+            self.game.game_status.increase_score(game_module.GameStatus.SCORE_GHOST)
             print("Pacman eat ghost")
         else:
+            if debugger.is_god_mode(): return # god mode: Pacman bất tử
             if self.__state == Maze.PACMAN_DIE: return
             self.set_state(Maze.PACMAN_DIE)
-            self.pacman.die()
+            pacman.die()
             self.game.game_status.decrease_lives()
             print("Pacman die")
+
 
     def __handle_pacman_pellet_collision(self, r, c):
         value = self.__grid[r][c]
         if value == self.PELLET:
             self.__grid[r][c] = 0
-            self.game.game_status.increase_score(game.GameStatus.SCORE_PELLET)
+            self.game.game_status.increase_score(game_module.GameStatus.SCORE_PELLET)
         elif value == self.POWER_PELLET:
             self.__grid[r][c] = 0
-            self.game.game_status.increase_score(game.GameStatus.SCORE_POWER_PELLET)
+            self.game.game_status.increase_score(game_module.GameStatus.SCORE_POWER_PELLET)
             for g in self.__ghosts:
                 g.switch_mode(ghost.Ghost.FRIGHTENED, 5)
             print("Eat Power pellet")
@@ -239,7 +307,7 @@ class MazeRender:
         if self.__maze.get_state() == Maze.READY:
             self.draw_ready_message()
         elif self.__maze.get_state() == Maze.EAT_GHOST:
-            self.draw_score(game.GameStatus.SCORE_GHOST)
+            self.draw_score(game_module.GameStatus.SCORE_GHOST)
 
         return self.__maze_surface
 

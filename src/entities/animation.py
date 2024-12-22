@@ -5,21 +5,30 @@ from src.utils.image_loader import ImageLoader
 class Animation:
     """Class giúp quản lý animation cho Pacman và Ghost"""
 
-    def __init__(self, entity, sprite_name, frame_rate = 5):
+    def __init__(self, entity, sprite_name, frame_rate=5):
         self.entity = entity
         self.index = 0
         self.frame_tick = 0
         self.frame_rate = frame_rate
         self.sprite_name = sprite_name.lower()
-        if   self.sprite_name == "pacman": self.sprites = self.SpriteSheets.pacman()
-        elif self.sprite_name == "ghost_red": self.sprites = self.SpriteSheets.ghost('red')
-        elif self.sprite_name == "ghost_pink": self.sprites = self.SpriteSheets.ghost('pink')
-        elif self.sprite_name == "ghost_orange": self.sprites = self.SpriteSheets.ghost('orange')
-        elif self.sprite_name == "ghost_cyan": self.sprites = self.SpriteSheets.ghost('cyan')
-        elif self.sprite_name == "frightened": self.sprites = self.SpriteSheets.frightened()
-        elif self.sprite_name == "frightened_flash": self.sprites = self.SpriteSheets.frightened_flash()
-        elif self.sprite_name == "ghost_dead": self.sprites = self.SpriteSheets.ghost_dead()
-        elif self.sprite_name == "pacman_dead": self.sprites = self.SpriteSheets.pacman_dead()
+        if self.sprite_name == "pacman":
+            self.sprites = self.SpriteSheets.pacman()
+        elif self.sprite_name == "ghost_red":
+            self.sprites = self.SpriteSheets.ghost('red')
+        elif self.sprite_name == "ghost_pink":
+            self.sprites = self.SpriteSheets.ghost('pink')
+        elif self.sprite_name == "ghost_orange":
+            self.sprites = self.SpriteSheets.ghost('orange')
+        elif self.sprite_name == "ghost_cyan":
+            self.sprites = self.SpriteSheets.ghost('cyan')
+        elif self.sprite_name == "frightened":
+            self.sprites = self.SpriteSheets.frightened()
+        elif self.sprite_name == "frightened_flash":
+            self.sprites = self.SpriteSheets.frightened_flash()
+        elif self.sprite_name == "ghost_dead":
+            self.sprites = self.SpriteSheets.ghost_dead()
+        elif self.sprite_name == "pacman_dead":
+            self.sprites = self.SpriteSheets.pacman_dead()
 
     def next(self):
         """ Lấy ra hình ảnh cho frame tiếp theo """
@@ -82,7 +91,7 @@ class Animation:
         @staticmethod
         def frightened_flash():
             img = ImageLoader()
-            tmp = (img.frightened_1(),  img.frightened_2('white'), img.frightened_1('white'), img.frightened_2())
+            tmp = (img.frightened_1(), img.frightened_2('white'), img.frightened_1('white'), img.frightened_2())
             return {
                 Direction.LEFT: tmp,
                 Direction.RIGHT: tmp,
@@ -94,10 +103,10 @@ class Animation:
         def ghost_dead():
             img = ImageLoader()
             return {
-                Direction.LEFT: (img.ghost_dead('left'),img.ghost_dead('left')),
-                Direction.RIGHT: (img.ghost_dead('right'),img.ghost_dead('right')),
-                Direction.UP: (img.ghost_dead('up'),img.ghost_dead('up')),
-                Direction.DOWN: (img.ghost_dead('down'),img.ghost_dead('down')),
+                Direction.LEFT: (img.ghost_dead('left'), img.ghost_dead('left')),
+                Direction.RIGHT: (img.ghost_dead('right'), img.ghost_dead('right')),
+                Direction.UP: (img.ghost_dead('up'), img.ghost_dead('up')),
+                Direction.DOWN: (img.ghost_dead('down'), img.ghost_dead('down')),
             }
 
         @staticmethod
