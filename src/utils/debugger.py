@@ -31,7 +31,7 @@ def render(surface):
     match mode:
         case "f1": draw_grid(surface)
         case "f2": draw_hitbox(surface, get_attributes('hitbox'))
-        case "f3": draw_path(surface, get_attributes('path_orange'))
+        case "f3": draw_path(surface, get_attributes('path_cyan'))
 
 
 def toggle_mode(m):

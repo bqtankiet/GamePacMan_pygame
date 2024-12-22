@@ -13,6 +13,7 @@ import src.utils.debugger as debugger
 from src.utils.level_setting import get_level_setting
 
 
+
 class Maze:
     WALL = 1
     PELLET = 2
@@ -24,7 +25,7 @@ class Maze:
     PACMAN_DIE = 3
 
     READY_TIME = 3000  # milliseconds
-    DELAY_1S_TIME = 1000 # miliseconds
+    DELAY_1S_TIME = 1000  # miliseconds
 
     def __init__(self, game):
         self.pacman = None
@@ -36,6 +37,21 @@ class Maze:
         self.__state = Maze.READY
         self.game = game
         self.maze_render = None
+        self.ghost_positions = {
+            "red": (11, 14),
+            "pink": (13, 14),
+            "cyan": (11, 14),
+            "orange": (15, 14)
+        }
+
+    def get_pacman_direction(self):
+        """Trả về hướng đi hiện tại của Pacman."""
+        if self.pacman:
+            return self.pacman.get_direction()
+        return None  # Trường hợp Pacman chưa được khởi tạo
+
+    def get_ghost_position(self, ghost_name):
+        return self.ghost_positions.get(ghost_name, None)
 
 
     def update(self):
@@ -112,15 +128,32 @@ class Maze:
         """Khôi phục lại các Pellet và Power Pellet từ MAZE_DATA gốc."""
         self.__grid = copy.deepcopy(MAZE_DATA)
 
+
     def respawn(self):
         self.add_entity(Pacman(), (23, 14))
         self.__ghosts = []
         self.add_entity(ghost.GhostRed(), ghost.RedAIStrategy.SPAWN_ROW_COL)
         self.add_entity(ghost.GhostOrange(), ghost.OrangeAIStrategy.SPAWN_POS)
+        self.add_entity(ghost.GhostPink(), ghost.PinkAIStrategy.SPAWN_POS)
+        self.add_entity(ghost.GhostCyan(), ghost.CyanAIStrategy.SPAWN_POS)
 
         # Giữ nguyên tốc độ của ghost theo cấp độ hiện tại
         self.set_speed_based_on_level()
 #--------------------------------------------------------------------------------
+        # pass
+
+    # Trong class Maze:
+    def get_ghosts(self):
+        return self.__ghosts
+
+    def is_valid_position(self, position):
+        """
+        Kiểm tra xem vị trí có hợp lệ trong mê cung không.
+        """
+        r, c = helper.pixel_to_grid(position)  # Chuyển pixel sang chỉ số hàng, cột
+        if 0 <= r < len(self.__grid) and 0 <= c < len(self.__grid[0]):
+            return self.__grid[r][c] != Maze.WALL  # Kiểm tra nếu không phải là tường
+        return False  # Nếu ra ngoài phạm vi hoặc là tường, trả về False
 
     def update_entity(self, entity):
         entity.update()
