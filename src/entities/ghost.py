@@ -7,6 +7,7 @@ import src.utils.debugger as debugger
 import src.core.game as game
 from src.utils.level_setting import get_level_setting
 import pygame
+import random
 
 
 class Ghost(Sprite):
@@ -164,7 +165,9 @@ class BasicAIStrategy(ABC):
             center_x = int(c * BLOCK_SIZE * SCALE + (BLOCK_SIZE * SCALE) // 2)
             center_y = int(r * BLOCK_SIZE * SCALE + (BLOCK_SIZE * SCALE) // 2)
 
-            debugger.set_attributes('path_cyan', path)
+            if ghost.name() in debugger.ghost_paths:
+                debugger.set_attributes(debugger.ghost_paths[ghost.name()], path)
+
             next = path[0].position  # Lấy bước tiếp theo
             dx = next[0] - ghost.get_position()[0]
             dy = next[1] - ghost.get_position()[1]
@@ -248,49 +251,58 @@ class RedAIStrategy(BasicAIStrategy):
 class OrangeAIStrategy(BasicAIStrategy):
     SPAWN_ROW_COL = (14, 9)
     SPAWN_POS = (SPAWN_ROW_COL[1], SPAWN_ROW_COL[0])  # x, y
-    SCATTER_POS = (1, 29)
+    SCATTER_POS = [(1, 29), (12, 29), (6, 26)]
     SCATTER_DURATION = 10
     CHASE_DURATION = 20
-    WAITING_DURATION = 15
+    WAITING_DURATION = -1
 
     def __init__(self):
         # Khởi tạo đúng các thuộc tính của lớp cha
         super().__init__()  # Gọi __init__ của lớp BasicAIStrategy
         self.last_random_pos_time = pygame.time.get_ticks()  # Không cần thiết nữa
         self.random_position = (0, 0)  # Vị trí mặc định ban đầu
+        self.target_corner = None
 
     def execute(self, ghost, maze):
-        """Thực thi thuật toán AI của Clyde"""
+        """Thực thi thuật toán AI của Orange"""
         self.auto_switch_mode(ghost)
 
         pacman_pos = maze.get_pacman_pos()
         ghost_pos = ghost.get_position()
         distance = self.calculate_distance(pacman_pos, ghost_pos)
-        dest = None
+
         if ghost.mode == Ghost.CHASE:
+            dest = self.target_corner
             if distance > 8:
-                dest = pacman_pos
-                ghost._speed = 2
+                if self.target_corner is None:
+                    dest = pacman_pos
+                    ghost._speed = 2
+                elif distance > 20:
+                    print('test')
+                    self.target_corner = None
             elif distance <= 8:
-                # Các góc có thể chọn
-                corners = [(1, 1), (1, 29), (26, 1), (26, 29)]
+                if self.target_corner is None:
+                    # Các góc có thể chọn
+                    corners = [(1, 1), (1, 29), (26, 1), (26, 29)]
 
-                # Tính khoảng cách từ Clyde đến mỗi góc
-                distances_to_corners = [self.calculate_distance(ghost_pos, corner) for corner in corners]
+                    # Tính khoảng cách từ Clyde đến mỗi góc
+                    distances_to_corners = [self.calculate_distance(ghost_pos, corner) for corner in corners]
 
-                # Chọn góc có khoảng cách xa nhất từ Clyde
-                farthest_corner = corners[distances_to_corners.index(max(distances_to_corners))]
-
-                dest = farthest_corner  # Di chuyển đến góc xa nhất
+                    # Chọn góc có khoảng cách xa nhất từ Clyde
+                    self.target_corner = corners[distances_to_corners.index(max(distances_to_corners))]
                 ghost._speed = 2
+                dest = self.target_corner
 
 
         elif ghost.mode == Ghost.FRIGHTENED:
             dest = self.SPAWN_POS
             ghost._speed = 1
         elif ghost.mode == Ghost.SCATTER:
-            dest = self.SCATTER_POS
+            dest = self.SCATTER_POS[self.scatter_step]
             ghost._speed = 2
+            if ghost.get_position() == dest:
+                # Chuyển sang điểm SCATTER tiếp theo
+                self.scatter_step = (self.scatter_step + 1) % len(self.SCATTER_POS)
         elif ghost.mode == Ghost.DEAD:
             dest = self.SPAWN_POS
             ghost._speed = 5
@@ -315,12 +327,12 @@ class OrangeAIStrategy(BasicAIStrategy):
 
         delta_time = (pygame.time.get_ticks() - ghost.last_time_switch_mode) // 1000
 
-        if ghost.mode is None and delta_time > self.WAITING_DURATION:
-            ghost.switch_mode(Ghost.CHASE, self.CHASE_DURATION)
-        elif delta_time > self.CHASE_DURATION and ghost.mode != Ghost.SCATTER:
+        if delta_time > self.WAITING_DURATION and ghost.mode is None:
             ghost.switch_mode(Ghost.SCATTER, self.SCATTER_DURATION)
         elif delta_time > self.SCATTER_DURATION and ghost.mode != Ghost.CHASE:
             ghost.switch_mode(Ghost.CHASE, self.CHASE_DURATION)
+        elif delta_time > self.CHASE_DURATION and ghost.mode != Ghost.SCATTER:
+            ghost.switch_mode(Ghost.SCATTER, self.SCATTER_DURATION)
 
     def calculate_distance(self, pos1, pos2):
         """Tính khoảng cách giữa hai điểm"""

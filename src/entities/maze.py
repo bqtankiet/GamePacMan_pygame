@@ -134,8 +134,8 @@ class Maze:
         self.__ghosts = []
         self.add_entity(ghost.GhostRed(), ghost.RedAIStrategy.SPAWN_ROW_COL)
         self.add_entity(ghost.GhostOrange(), ghost.OrangeAIStrategy.SPAWN_ROW_COL)
-        self.add_entity(ghost.GhostPink(), ghost.PinkAIStrategy.SPAWN_ROW_COL)
-        self.add_entity(ghost.GhostCyan(), ghost.CyanAIStrategy.SPAWN_ROW_COL)
+        # self.add_entity(ghost.GhostPink(), ghost.PinkAIStrategy.SPAWN_ROW_COL)
+        # self.add_entity(ghost.GhostCyan(), ghost.CyanAIStrategy.SPAWN_ROW_COL)
 
         # Giữ nguyên tốc độ của ghost theo cấp độ hiện tại
         self.set_speed_based_on_level()
