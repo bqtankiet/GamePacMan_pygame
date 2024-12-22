@@ -1,6 +1,5 @@
 import random
 
-import ghost
 import pygame
 from src.entities.Sprite import Sprite
 from src.entities.animation import Animation
