@@ -1,11 +1,14 @@
 import random
 import pygame
+
 from src.entities.Sprite import Sprite
 from src.entities.animation import Animation
 from src.utils.astar_pathfinding import AStarPathfinding
 from src.utils.constant import BLOCK_SIZE, SCALE, MAZE_DATA
 from src.utils.enum import Direction
 import src.utils.debugger as debugger
+import src.core.game as game
+from src.utils.level_setting import get_level_setting
 
 
 class Ghost(Sprite):
@@ -22,6 +25,7 @@ class Ghost(Sprite):
         self.last_time_switch_mode = 0  # Thời gian chuyển trạng thái gần nhất
         self.mode_duration = 0  # Thời gian duy trì trạng thái hiện tại
         self.level = level
+        self.level_speed = get_level_setting(level)['speed']
 
         super().__init__(animation, hitbox)
 
@@ -37,16 +41,21 @@ class Ghost(Sprite):
 #-----------------------------------------------------------
     #Tang Toc Do Ghost Qua Cac Level
     def set_speed_based_on_level(self):
-        if self.mode == Ghost.FRIGHTENED:
-            self._speed = 1
-        elif self.mode == Ghost.CHASE:
-            self._speed = Ghost.CHASE + int((self.level - 1) * 1)
-        elif self.mode == Ghost.SCATTER:
-            self._speed = Ghost.SCATTER + int((self.level - 1) * 0.5)
-        elif self.mode == Ghost.DEAD:
-            self._speed = 4
-        else:
-            self._speed = 1
+        self.level = game.Game.get_instance().game_status.level
+        level_setting = get_level_setting(self.level)
+        self.level_speed = level_setting['speed']
+        print('level', self.level)
+        print('level_speed', self.level_speed)
+        # if self.mode == Ghost.FRIGHTENED:
+        #     self._speed = 1
+        # elif self.mode == Ghost.CHASE:
+        #     self._speed = Ghost.CHASE + int((self.level - 1) * 1)
+        # elif self.mode == Ghost.SCATTER:
+        #     self._speed = Ghost.SCATTER + int((self.level - 1) * 0.5)
+        # elif self.mode == Ghost.DEAD:
+        #     self._speed = 4
+        # else:
+        #     self._speed = 1
 #------------------------------------------------------------
     def name(self):
         pass
@@ -176,16 +185,17 @@ class RedAIStrategy(BasicAIStrategy):
     def execute(self, ghost, maze):
         # Tự động chuyển đổi trạng thái dựa trên thời gian
         self.auto_switch_mode(ghost)
+        speed = ghost.level_speed
 
         # Xác định đích đến dựa trên trạng thái hiện tại
         if ghost.mode == Ghost.CHASE:
             dest = maze.get_pacman_pos()  # Đuổi theo Pacman
-            ghost._speed = 2
+            ghost._speed = speed
         elif ghost.mode == Ghost.FRIGHTENED:
             dest = self.SPAWN_POS  # Chạy về vị trí spawn
-            ghost._speed = 1
+            ghost._speed = max(1, speed-1)
         elif ghost.mode == Ghost.SCATTER:
-            ghost._speed = 2
+            ghost._speed = speed
             dest = self.SCATTER_POS[self.scatter_step]
             if ghost.get_position() == dest:
                 # Chuyển sang điểm SCATTER tiếp theo

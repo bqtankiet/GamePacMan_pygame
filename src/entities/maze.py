@@ -10,6 +10,8 @@ from src.utils.enum import Direction
 from src.utils.image_loader import ImageLoader
 import src.utils.helper as helper
 import src.utils.debugger as debugger
+from src.utils.level_setting import get_level_setting
+
 
 class Maze:
     WALL = 1
@@ -92,8 +94,12 @@ class Maze:
         self.set_state(Maze.READY)  # Quay lại trạng thái READY để bắt đầu màn tiếp theo
 
     def set_speed_based_on_level(self):
+        level = game.Game.get_instance().game_status.level
+        # Tăng tốc độ pacman
+        self.pacman._speed = get_level_setting(level)['speed']
         # Tăng tốc độ của ghost
         for g in self.__ghosts:
+            g.level = level
             g.set_speed_based_on_level()
 
     def next_level(self):
