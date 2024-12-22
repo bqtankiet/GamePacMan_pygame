@@ -1,9 +1,7 @@
 import pygame
 
 import src.utils.debugger as debugger
-from src.entities.ghost import Ghost, GhostRed, RedAIStrategy
 from src.entities.maze import Maze, MazeRender
-from src.entities.pacman import Pacman
 from src.scenes.scene import Scene
 from src.utils.constant import WIDTH, HEIGHT
 from src.utils.enum import Direction
@@ -17,7 +15,7 @@ class GamePlay(Scene):
         super().__init__()
         self._game = g.Game.get_instance()
 
-        self.__maze = Maze(self._game)
+        self.__maze = Maze()
         self.__maze_render = MazeRender(self.__maze)
         self._game.game_status.start_game()
     #-----------------------------------------
@@ -54,9 +52,13 @@ class GamePlay(Scene):
     def update(self):
         self.__maze.update()
 
+        # Kiểm tra nếu Pacman ăn hết các viên pellet
+        if self.__maze.transition_to_next_level:
+            self._game.switch_scene("NextLevel")  # Chuyển sang màn kế tiếp hoặc màn hoàn thành
+
     def reset(self):
         self._game = g.Game.get_instance()
-        self.__maze = Maze(self._game)
+        self.__maze = Maze()
         self.__maze_render = MazeRender(self.__maze)
         self._game.game_status.start_game()
 
