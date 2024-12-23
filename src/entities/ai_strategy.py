@@ -398,26 +398,73 @@ class OrangeAIStrategyLv1(OrangeAIStrategy):
     CHASE_DURATION = 10
     WAITING_DURATION = 5
 
-
 #----------------------------------
 # AI STRATEGY CHO LEVEL 2
 #----------------------------------
-class RedAIStrategyLv2(RedAIStrategy): pass
+class RedAIStrategyLv2(RedAIStrategy):
+    SPEED = 2
+    SPAWN_ROW_COL = (14, 12)
+    HOME_POS = (12, 14)
+    SCATTER_DURATION = 8
+    CHASE_DURATION = 15
+    WAITING_DURATION = 3
 
-class OrangeAIStrategyLv2(OrangeAIStrategy): pass
+class OrangeAIStrategyLv2(OrangeAIStrategy):
+    SPEED = 2
+    SPAWN_ROW_COL = (14, 13)
+    HOME_POS = (13, 14)
+    SCATTER_DURATION = 8
+    CHASE_DURATION = 12
+    WAITING_DURATION = 3
 
-class PinkAIStrategyLv2(PinkAIStrategy): pass
+class PinkAIStrategyLv2(PinkAIStrategy):
+    SPEED = 2
+    SPAWN_ROW_COL = (14, 14)
+    HOME_POS = (14, 14)
+    SCATTER_DURATION = 8
+    CHASE_DURATION = 12
+    WAITING_DURATION = 3
 
-class CyanAIStrategyLv2(CyanAIStrategy): pass
+class CyanAIStrategyLv2(CyanAIStrategy):
+    SPEED = 2
+    SPAWN_ROW_COL = (14, 15)
+    HOME_POS = (15, 14)
+    SCATTER_DURATION = 8
+    CHASE_DURATION = 12
+    WAITING_DURATION = 3
 
 
 #----------------------------------
 # AI STRATEGY CHO LEVEL 3
 #----------------------------------
-class RedAIStrategyLv3(RedAIStrategy): pass
+class RedAIStrategyLv3(RedAIStrategy):
+    SPEED = 3
+    SPAWN_ROW_COL = (14, 12)
+    HOME_POS = (12, 14)
+    SCATTER_DURATION = 6
+    CHASE_DURATION = 16
+    WAITING_DURATION = 2
 
-class OrangeAIStrategyLv3(OrangeAIStrategy): pass
+class OrangeAIStrategyLv3(OrangeAIStrategy):
+    SPEED = 3
+    SPAWN_ROW_COL = (14, 13)
+    HOME_POS = (13, 14)
+    SCATTER_DURATION = 6
+    CHASE_DURATION = 14
+    WAITING_DURATION = 2
 
-class PinkAIStrategyLv3(PinkAIStrategy): pass
+class PinkAIStrategyLv3(PinkAIStrategy):
+    SPEED = 3
+    SPAWN_ROW_COL = (14, 14)
+    HOME_POS = (12, 14)
+    SCATTER_DURATION = 6
+    CHASE_DURATION = 14
+    WAITING_DURATION = 2
 
-class CyanAIStrategyLv3(CyanAIStrategy): pass
+class CyanAIStrategyLv3(CyanAIStrategy):
+    SPEED = 3
+    SPAWN_ROW_COL = (14, 15)
+    HOME_POS = (14, 15)
+    SCATTER_DURATION = 6
+    CHASE_DURATION = 14
+    WAITING_DURATION = 2
