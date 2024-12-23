@@ -5,6 +5,7 @@ from src.scenes.scene import Scene
 from src.utils.constant import HEIGHT, WIDTH, SCALE
 from src.utils.image_loader import ImageLoader
 import src.core.game as g
+from src.utils.sound_manager import SoundManager
 
 
 class MainMenu(Scene):
@@ -38,10 +39,13 @@ class MainMenu(Scene):
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
+                SoundManager.ButtonSound.play()
                 self.__button_group.current().fire()
             elif event.key == pygame.K_DOWN:
+                SoundManager.ButtonSound.play()
                 self.__button_group.next()
             elif event.key == pygame.K_UP:
+                SoundManager.ButtonSound.play()
                 self.__button_group.previous()
 
     def update(self):
@@ -51,4 +55,8 @@ class MainMenu(Scene):
 
     def on_enter(self):
         self.__button_group.reset()
+        SoundManager.BackgroundMusic.play(loops=-1)
+
+    def on_exit(self):
+        SoundManager.BackgroundMusic.stop()
 
