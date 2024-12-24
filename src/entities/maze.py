@@ -108,6 +108,7 @@ class Maze:
         self.next_level()
         self.reset_pellets()
         print("Next level!")
+        self.sound_manager.stop_sound("fright")
         self.respawn()
         self.set_state(Maze.READY)  # Quay lại trạng thái READY để bắt đầu màn tiếp theo
 
