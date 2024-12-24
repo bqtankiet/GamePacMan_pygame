@@ -34,6 +34,9 @@ class GameOver(Scene):
         # init sound
         self.sound_manager = SoundManager()
         self.sound_manager.load_sound("button", "../resource/sounds/sound-effect/credit.wav")
+        self.sound_manager.load_sound("gameover", "../resource/sounds/sound-effect/gameover.mp3")
+        self.sound_manager.sounds["gameover"].set_volume(1)
+
 
     def render_surface(self):
         """Vẽ màn hình Game Over"""
@@ -93,6 +96,10 @@ class GameOver(Scene):
         self.__score = ImageLoader().text_image(f'{score}')
         self.__highest_score = ImageLoader().text_image(f'{highest_score}')
         self.__time = ImageLoader().text_image(f"{current_time[0]}'{current_time[1]:02}")
+        self.sound_manager.play_sound("gameover")
+
+    def on_exit(self):
+        self.sound_manager.stop_all()
 
     def play_again(self):
         """Khi bấm Play Again, reset game và quay lại level 1"""
