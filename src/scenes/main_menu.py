@@ -18,6 +18,10 @@ class MainMenu(Scene):
         self.__button_exit = TextButton("Exit", action=lambda: g.Game.get_instance().exit())
         self.__button_group = ButtonGroup([self.__button_start, self.__button_exit])
 
+        self.sound_manager = SoundManager()
+        self.sound_manager.load_sound("button", "../resource/sounds/sound-effect/credit.wav")
+
+
     #-----------------------------------------
     # Các methods override của lớp cha (Scene)
     #-----------------------------------------
@@ -39,13 +43,13 @@ class MainMenu(Scene):
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
-                SoundManager.ButtonSound.play()
+                self.sound_manager.play_sound("button")
                 self.__button_group.current().fire()
             elif event.key == pygame.K_DOWN:
-                SoundManager.ButtonSound.play()
+                self.sound_manager.play_sound("button")
                 self.__button_group.next()
             elif event.key == pygame.K_UP:
-                SoundManager.ButtonSound.play()
+                self.sound_manager.play_sound("button")
                 self.__button_group.previous()
 
     def update(self):
@@ -55,8 +59,9 @@ class MainMenu(Scene):
 
     def on_enter(self):
         self.__button_group.reset()
-        SoundManager.BackgroundMusic.play(loops=-1)
+        self.sound_manager.load_music("../resource/sounds/music/background1.mp3")
+        self.sound_manager.play_music()
 
     def on_exit(self):
-        SoundManager.BackgroundMusic.stop()
+        self.sound_manager.stop_music()
 

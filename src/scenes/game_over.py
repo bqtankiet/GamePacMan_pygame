@@ -4,6 +4,7 @@ from src.utils.constant import WIDTH, HEIGHT, SCALE
 from src.utils.image_loader import ImageLoader
 from src.scenes.component import TextButton, ButtonGroup
 import src.core.game as g
+from src.utils.sound_manager import SoundManager
 
 
 class GameOver(Scene):
@@ -29,6 +30,10 @@ class GameOver(Scene):
         self.__score = ImageLoader().text_image("750")  # Dữ liệu thử nghiệm
         self.__highest_score = ImageLoader().text_image("1000")  # Dữ liệu thử nghiệm
         self.__time = ImageLoader().text_image("15'30")  # Dữ liệu thử nghiệm
+
+        # init sound
+        self.sound_manager = SoundManager()
+        self.sound_manager.load_sound("button", "../resource/sounds/sound-effect/credit.wav")
 
     def render_surface(self):
         """Vẽ màn hình Game Over"""
@@ -65,10 +70,13 @@ class GameOver(Scene):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
                 self.__button_group.previous()
+                self.sound_manager.play_sound("button")
             elif event.key == pygame.K_DOWN:
                 self.__button_group.next()
+                self.sound_manager.play_sound("button")
             elif event.key == pygame.K_RETURN:  # Nhấn Enter để chọn nút
                 self.__button_group.current().fire()
+                self.sound_manager.play_sound("button")
 
     def update(self):
         self.__button_group.update() # Cập nhật lại trạng thái các button

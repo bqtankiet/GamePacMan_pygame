@@ -5,6 +5,7 @@ from src.scenes.scene import Scene
 from src.utils.constant import WIDTH, HEIGHT, SCALE
 from src.utils.image_loader import ImageLoader
 import src.core.game as g
+from src.utils.sound_manager import SoundManager
 
 
 class PauseGame(Scene):
@@ -31,6 +32,9 @@ class PauseGame(Scene):
         self.__highest_score = ImageLoader().text_image("1000") # TODO: Dữ liệu chỉ để test
         self.__time = ImageLoader().text_image("15'30") # TODO: Dữ liệu chỉ để test
 
+        # init sound
+        self.sound_manager = SoundManager()
+        self.sound_manager.load_sound("button", "../resource/sounds/sound-effect/credit.wav")
 
     #-----------------------------------------
     # Các methods override của lớp cha (Scene)
@@ -83,10 +87,13 @@ class PauseGame(Scene):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_DOWN:
                 self.__button_group.next()
+                self.sound_manager.play_sound("button")
             elif event.key == pygame.K_UP:
                 self.__button_group.previous()
+                self.sound_manager.play_sound("button")
             elif event.key == pygame.K_RETURN:
                 self.__button_group.current().fire()
+                self.sound_manager.play_sound("button")
 
     def update(self):
         self.__button_group.update() # Cập nhật lại trạng thái các button
@@ -104,7 +111,8 @@ class PauseGame(Scene):
         self.__highest_score = ImageLoader().text_image(f'{highest_score}')
         self.__time = ImageLoader().text_image(f"{current_time[0]}'{current_time[1]:02}")
 
-
+    def on_exit(self):
+        self.sound_manager.stop_all()
     #----------------------------------------
     # Các methods riêng của lớp
     #----------------------------------------
