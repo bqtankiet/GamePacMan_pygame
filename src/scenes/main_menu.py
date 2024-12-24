@@ -5,6 +5,7 @@ from src.scenes.scene import Scene
 from src.utils.constant import HEIGHT, WIDTH, SCALE
 from src.utils.image_loader import ImageLoader
 import src.core.game as g
+from src.utils.sound_manager import SoundManager
 
 
 class MainMenu(Scene):
@@ -16,6 +17,10 @@ class MainMenu(Scene):
         self.__button_start = TextButton("Start Game", action=lambda: g.Game.get_instance().switch_scene("GamePlay", reset = True))
         self.__button_exit = TextButton("Exit", action=lambda: g.Game.get_instance().exit())
         self.__button_group = ButtonGroup([self.__button_start, self.__button_exit])
+
+        self.sound_manager = SoundManager()
+        self.sound_manager.load_sound("button", "../resource/sounds/sound-effect/credit.wav")
+
 
     #-----------------------------------------
     # Các methods override của lớp cha (Scene)
@@ -38,10 +43,13 @@ class MainMenu(Scene):
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
+                self.sound_manager.play_sound("button")
                 self.__button_group.current().fire()
             elif event.key == pygame.K_DOWN:
+                self.sound_manager.play_sound("button")
                 self.__button_group.next()
             elif event.key == pygame.K_UP:
+                self.sound_manager.play_sound("button")
                 self.__button_group.previous()
 
     def update(self):
@@ -51,4 +59,9 @@ class MainMenu(Scene):
 
     def on_enter(self):
         self.__button_group.reset()
+        self.sound_manager.load_music("../resource/sounds/music/background1.mp3")
+        self.sound_manager.play_music()
+
+    def on_exit(self):
+        self.sound_manager.stop_music()
 

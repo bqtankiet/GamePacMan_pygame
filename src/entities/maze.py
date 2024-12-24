@@ -23,10 +23,10 @@ class Maze:
     EAT_GHOST = 2
     PACMAN_DIE = 3
 
-    READY_TIME = 3000  # milliseconds
+    READY_TIME = 4000  # milliseconds
     DELAY_1S_TIME = 1000  # miliseconds
 
-    def __init__(self):
+    def __init__(self, sound_manager):
         self.game = game_module.Game.get_instance()
         self.pacman = None
         self.__ghosts = []
@@ -36,6 +36,17 @@ class Maze:
         self.__start_time = pygame.time.get_ticks()
         self.__state = Maze.READY
         self.maze_render = None
+        self.play_sound = True
+
+        self.sound_manager = sound_manager
+        self.sound_manager.load_sound("ready", "../resource/sounds/sound-effect/start.wav")
+        self.sound_manager.load_sound("death", "../resource/sounds/sound-effect/death_0.wav")
+        self.sound_manager.load_sound("eat_dot_0", "../resource/sounds/sound-effect/eat_dot_1.wav")
+        self.sound_manager.load_sound("eat_dot", "../resource/sounds/sound-effect/eat_dot_1.wav")
+        self.sound_manager.load_sound("fright", "../resource/sounds/sound-effect/fright.wav")
+        self.sound_manager.load_sound("eat_ghost", "../resource/sounds/sound-effect/eat_ghost.wav")
+
+
 
     def get_pacman_direction(self):
         """Trả về hướng đi hiện tại của Pacman."""
@@ -67,7 +78,10 @@ class Maze:
                 return
 
         elif self.__state == Maze.PACMAN_DIE:
+            self.sound_manager.stop_sound("fright")
             if self.__is_time_elapsed(current_time, Maze.DELAY_1S_TIME):
+                if self.play_sound: self.sound_manager.play_sound("death")
+                self.play_sound = False
                 if self.__ghosts: self.__ghosts = []
                 self.pacman.update()
                 if self.__is_time_elapsed(current_time, Maze.DELAY_1S_TIME * 3.5):
@@ -76,6 +90,7 @@ class Maze:
                         return
                     self.respawn()
                     self.set_state(Maze.READY)
+                    self.play_sound = True
                 else:
                     return
 
@@ -93,6 +108,7 @@ class Maze:
         self.next_level()
         self.reset_pellets()
         print("Next level!")
+        self.sound_manager.stop_sound("fright")
         self.respawn()
         self.set_state(Maze.READY)  # Quay lại trạng thái READY để bắt đầu màn tiếp theo
 
@@ -117,7 +133,7 @@ class Maze:
             self.add_entity(ghost.GhostPink(ai.PinkAIStrategyLv2()), ai.PinkAIStrategyLv2.SPAWN_ROW_COL)
             self.add_entity(ghost.GhostCyan(ai.CyanAIStrategyLv2()), ai.CyanAIStrategyLv2.SPAWN_ROW_COL)
         elif level == 3:
-            # self.pacman._speed = 3 # Tăng tốc độ Pacman nếu ghost nhanh quá
+            self.pacman._speed = 3 # Tăng tốc độ Pacman nếu ghost nhanh quá
             self.add_entity(ghost.GhostRed(ai.RedAIStrategyLv3()), ai.RedAIStrategyLv3.SPAWN_ROW_COL)
             self.add_entity(ghost.GhostOrange(ai.OrangeAIStrategyLv3()), ai.OrangeAIStrategyLv3.SPAWN_ROW_COL)
             self.add_entity(ghost.GhostPink(ai.PinkAIStrategyLv3()), ai.PinkAIStrategyLv3.SPAWN_ROW_COL)
@@ -176,6 +192,7 @@ class Maze:
         if g.mode == ghost.Ghost.DEAD: return
         if g.mode == ghost.Ghost.FRIGHTENED:
             self.set_state(Maze.EAT_GHOST)
+            self.sound_manager.play_sound("eat_ghost")
             g.switch_mode(ghost.Ghost.DEAD, 99)
             self.game.game_status.increase_score(game_module.GameStatus.SCORE_GHOST)
             print("Pacman eat ghost")
@@ -191,14 +208,22 @@ class Maze:
     def __handle_pacman_pellet_collision(self, r, c):
         value = self.__grid[r][c]
         if value == self.PELLET:
+            self.sound_manager.play_sound("eat_dot_0")
+            # self.sound_manager.play_sound("eat_dot")
             self.__grid[r][c] = 0
             self.game.game_status.increase_score(game_module.GameStatus.SCORE_PELLET)
         elif value == self.POWER_PELLET:
+            self.sound_manager.play_sound("fright", loops=-1)
             self.__grid[r][c] = 0
             self.game.game_status.increase_score(game_module.GameStatus.SCORE_POWER_PELLET)
             for g in self.__ghosts:
                 g.switch_mode(ghost.Ghost.FRIGHTENED, 5)
             print("Eat Power pellet")
+
+        stop_fright = True
+        for g in self.__ghosts:
+            if g.mode == ghost.Ghost.FRIGHTENED: stop_fright = False
+        if stop_fright: self.sound_manager.stop_sound("fright")
 
     def handle_ghost_ai(self, entity):
         if not self.__collision_manager.is_out_of_map(self.pacman):
@@ -236,6 +261,8 @@ class Maze:
         return self.__state
 
     def set_state(self, state):
+        if state == Maze.READY:
+            self.sound_manager.play_sound("ready")
         self.__state = state
         self.__start_time = pygame.time.get_ticks()
 

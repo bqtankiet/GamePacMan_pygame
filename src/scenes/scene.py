@@ -43,3 +43,5 @@ class Scene(ABC):
     def reset(self):
         """Phương thức này dùng để reset màn hình về trạng thái ban đầu"""
         pass
+
+    def on_exit(self): pass

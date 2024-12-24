@@ -7,15 +7,20 @@ from src.utils.constant import WIDTH, HEIGHT
 from src.utils.enum import Direction
 from src.utils.image_loader import ImageLoader
 import src.core.game as g
+from src.utils.sound_manager import SoundManager
+
 
 class GamePlay(Scene):
     """Màn hình Gameplay"""
 
     def __init__(self):
         super().__init__()
+        # init sound
+        self.sound_manager = SoundManager()
+
         self._game = g.Game.get_instance()
 
-        self.__maze = Maze()
+        self.__maze = Maze(self.sound_manager)
         self.__maze_render = MazeRender(self.__maze)
         self._game.game_status.start_game()
     #-----------------------------------------
@@ -58,7 +63,7 @@ class GamePlay(Scene):
 
     def reset(self):
         self._game = g.Game.get_instance()
-        self.__maze = Maze()
+        self.__maze = Maze(self.sound_manager)
         self.__maze_render = MazeRender(self.__maze)
         self._game.game_status.start_game()
 
@@ -66,7 +71,11 @@ class GamePlay(Scene):
     def on_enter(self):
         self.__maze.set_state(Maze.READY)
         self._game.game_status.resume()
+        self.sound_manager.load_music("../resource/sounds/music/gameplaymusic.mp3")
+        self.sound_manager.play_music()
 
+    def on_exit(self):
+        self.sound_manager.stop_all()
     #----------------------------------------
     # Các methods riêng của lớp GamePlay
     #----------------------------------------
