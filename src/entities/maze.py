@@ -36,6 +36,7 @@ class Maze:
         self.__start_time = pygame.time.get_ticks()
         self.__state = Maze.READY
         self.maze_render = None
+        self.play_sound = True
 
         self.sound_manager = sound_manager
         self.sound_manager.load_sound("ready", "../resource/sounds/sound-effect/start.wav")
@@ -78,6 +79,8 @@ class Maze:
 
         elif self.__state == Maze.PACMAN_DIE:
             if self.__is_time_elapsed(current_time, Maze.DELAY_1S_TIME):
+                if self.play_sound: self.sound_manager.play_sound("death")
+                self.play_sound = False
                 if self.__ghosts: self.__ghosts = []
                 self.pacman.update()
                 if self.__is_time_elapsed(current_time, Maze.DELAY_1S_TIME * 3.5):
@@ -86,6 +89,7 @@ class Maze:
                         return
                     self.respawn()
                     self.set_state(Maze.READY)
+                    self.play_sound = True
                 else:
                     return
 

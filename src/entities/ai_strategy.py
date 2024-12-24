@@ -442,29 +442,29 @@ class RedAIStrategyLv3(RedAIStrategy):
     SPAWN_ROW_COL = (14, 12)
     HOME_POS = (12, 14)
     SCATTER_DURATION = 6
-    CHASE_DURATION = 16
-    WAITING_DURATION = 2
+    CHASE_DURATION = 99
+    WAITING_DURATION = -1
 
 class OrangeAIStrategyLv3(OrangeAIStrategy):
     SPEED = 3
     SPAWN_ROW_COL = (14, 13)
     HOME_POS = (13, 14)
     SCATTER_DURATION = 6
-    CHASE_DURATION = 14
-    WAITING_DURATION = 2
+    CHASE_DURATION = 99
+    WAITING_DURATION = -1
 
 class PinkAIStrategyLv3(PinkAIStrategy):
     SPEED = 3
     SPAWN_ROW_COL = (14, 14)
     HOME_POS = (12, 14)
     SCATTER_DURATION = 6
-    CHASE_DURATION = 14
-    WAITING_DURATION = 2
+    CHASE_DURATION = 99
+    WAITING_DURATION = -1
 
 class CyanAIStrategyLv3(CyanAIStrategy):
     SPEED = 3
     SPAWN_ROW_COL = (14, 15)
     HOME_POS = (14, 15)
     SCATTER_DURATION = 6
-    CHASE_DURATION = 14
-    WAITING_DURATION = 2
+    CHASE_DURATION = 99
+    WAITING_DURATION = -1
