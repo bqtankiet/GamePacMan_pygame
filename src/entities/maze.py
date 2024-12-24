@@ -78,6 +78,7 @@ class Maze:
                 return
 
         elif self.__state == Maze.PACMAN_DIE:
+            self.sound_manager.stop_sound("fright")
             if self.__is_time_elapsed(current_time, Maze.DELAY_1S_TIME):
                 if self.play_sound: self.sound_manager.play_sound("death")
                 self.play_sound = False
