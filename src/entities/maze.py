@@ -127,7 +127,7 @@ class Maze:
             self.add_entity(ghost.GhostPink(ai.PinkAIStrategyLv2()), ai.PinkAIStrategyLv2.SPAWN_ROW_COL)
             self.add_entity(ghost.GhostCyan(ai.CyanAIStrategyLv2()), ai.CyanAIStrategyLv2.SPAWN_ROW_COL)
         elif level == 3:
-            # self.pacman._speed = 3 # Tăng tốc độ Pacman nếu ghost nhanh quá
+            self.pacman._speed = 3 # Tăng tốc độ Pacman nếu ghost nhanh quá
             self.add_entity(ghost.GhostRed(ai.RedAIStrategyLv3()), ai.RedAIStrategyLv3.SPAWN_ROW_COL)
             self.add_entity(ghost.GhostOrange(ai.OrangeAIStrategyLv3()), ai.OrangeAIStrategyLv3.SPAWN_ROW_COL)
             self.add_entity(ghost.GhostPink(ai.PinkAIStrategyLv3()), ai.PinkAIStrategyLv3.SPAWN_ROW_COL)
